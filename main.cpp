@@ -25,17 +25,12 @@ int main(void) {
     std::cout << "There is an item with title: " << item.get_title() << std::endl;
   }
 
-  float r, theta;
-
   while (!WindowShouldClose()) {
 
     if (IsKeyDown(KEY_A))
       settings.rotation_offset -= 0.08;
     if (IsKeyDown(KEY_D))
       settings.rotation_offset += 0.08;
-
-    coords_to_polar(GetMousePosition(), r, theta);
-    std::cout << "polar coords of mouse cursor is: radius: " << r << " angle: " << theta << std::endl;
 
 
     BeginDrawing();
@@ -58,31 +53,33 @@ void update_postion() {
   float theta = (2 * PI) / item_array.size();
 
   for (int i = 0; i < item_array.size(); i++) {
-    float x = window_width / 2 +
-      settings.radius *
-      cos(theta * i + PI / item_array.size() + settings.rotation_offset);
-    float y = window_height / 2 +
-      settings.radius *
-      sin(theta * i + PI / item_array.size() + settings.rotation_offset);
-    item_array[i].target_postion = { x, y };
-    item_array[i].lerp();
 
+
+    item_array[i].target_angle = theta * i + PI / item_array.size() + settings.rotation_offset;
+    item_array[i].target_radius = settings.radius;
+    item_array[i].lerp();
 
   };
 }
 
 void render_items() {
   for (auto i : item_array) {
+    Vector2 current_position = polar_to_coords(i.current_radius, i.current_angle);
 
     float theta1, theta2, r1, r2;
     coords_to_polar(GetMousePosition(), r1, theta1);
-    coords_to_polar(i.target_postion, r2, theta2);
+    coords_to_polar(current_position, r2, theta2);
+
+    // I am doing the extra step of converting to position and then back to polar so that the angle of the item is reduced to -2PI < theta < 2PI
+    // else it can be any number and that stuffs up the angle check with the mouse.
+    // a silly hack ik but I'm kinda lazy and won't be fixing it :3
 
     if (abs(theta2 - theta1) < PI / item_array.size()) {
-      DrawText(i.title.c_str(), i.target_postion.x, (i.target_postion.y < 450) ? i.target_postion.y - 50 : i.target_postion.y + 50, 22, WHITE);
+      DrawText(i.title.c_str(), current_position.x, (current_position.y < 450) ? current_position.y - 50 : current_position.y + 50, 22, WHITE);
     }
 
-    DrawCircle(i.current_position.x, i.current_position.y, 25, GREEN);
+    DrawCircle(current_position.x, current_position.y, 25, GREEN);
     i.render_line();
   }
+  std::cout << "--------------------------------------------" << std::endl;
 }

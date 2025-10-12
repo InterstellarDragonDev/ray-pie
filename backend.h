@@ -9,17 +9,24 @@
 #include <vector>
 #include <memory>
 
+/*
+ITEM CLASS:
+  all coords are saved in polar form and converted for frame to be rendered.
 
+
+*/
 
 class ITEM {
 private:
   Texture2D line_texture = LoadTexture("line.png");
 
 public:
-  Vector2 current_position, target_postion;
+  float current_radius, target_radius;
+  float current_angle, target_angle;
+  bool type;
   std::string title;
-  const char* icon_path;
-  const char* launch_command;
+  std::string icon_path;
+  std::string launch_command;
   std::vector<ITEM> button_array;
 
   void lerp();
@@ -31,8 +38,9 @@ public:
 
 
 // miscellaneous -------------------------------
+// !! polar_to_coords INCLUDES THE 400 PIXEL SHIFT TO THE CENTRE ALREADY
 void coords_to_polar(Vector2 coords, float& r, float& theta);
-void polar_to_coords(float r, float theta, Vector2& coords);
+Vector2 polar_to_coords(float r, float theta);
 
 
 
@@ -43,7 +51,7 @@ struct settings_struct {
   bool fading = false;
   bool dynamic_movement = false;
   bool centre_pointer = false;
-  const char* centre_icon = "";
+  std::string centre_icon = "";
 };
 
 // File Reading & Saving

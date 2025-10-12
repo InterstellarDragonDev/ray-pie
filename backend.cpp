@@ -1,15 +1,21 @@
 #include "backend.h"
 
 ITEM::ITEM() {
-  current_position = { 0, 0 };
-  target_postion = { 0, 0 };
+  current_angle = 0;
+  target_angle = 0;
+  current_radius = 0;
+  target_radius = 0;
+
 };
 
 void ITEM::lerp() {
-  current_position = Vector2Lerp(current_position, target_postion, 0.2);
+  current_angle = Lerp(current_angle, target_angle, 0.2);
+  current_radius = Lerp(current_radius, target_radius, 0.2);
 };
 
 void ITEM::render_line() {
+  Vector2 current_position = polar_to_coords(current_radius, current_angle);
+
   Vector2 diff = Vector2Subtract({ 400, 400 }, current_position);
   float length = Vector2Length(diff) - 40;
   float angle = atan2f(diff.y, diff.x) * RAD2DEG;
@@ -34,7 +40,6 @@ void coords_to_polar(Vector2 coords, float& r, float& theta) {
   theta = atan2(coords.y, coords.x);
 }
 
-void polar_to_coords(float r, float theta, Vector2& coords) {
-  coords.x = r * cos(theta) + 400;
-  coords.y = r * sin(theta) + 400;
+Vector2 polar_to_coords(float r, float theta) {
+  return { r * cos(theta) + 400 , r * sin(theta) + 400 };
 }
