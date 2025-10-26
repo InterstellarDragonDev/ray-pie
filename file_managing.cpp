@@ -88,6 +88,8 @@ int load_settings(settings_struct& settings, toml::table tbl) {
 
 void load_items(toml::table tbl, std::vector<ITEM>& item_vector) {
   // loop through main table and extracts items
+  std::vector<ITEM> temp_vector;
+  int heightest_nest_lvl = 0;
   for (auto const& [key, value] : tbl) {
 
     if (value.is_table()) {
@@ -100,36 +102,59 @@ void load_items(toml::table tbl, std::vector<ITEM>& item_vector) {
       auto item_table = tbl[key].as_table();
 
       if (item_table->get_as<std::string>("type")->get() == "button") {
-        if (item_table->get_as<std::string>("parent")->get() == "Dev") {
-          item_vector.push_back(load_button(item_table));
-        }
-
+        if (item_table->get_as<int64_t>("nest_level")->get() > heightest_nest_lvl) { heightest_nest_lvl = item_table->get_as<int64_t>("nest_level")->get(); }
+        temp_vector.push_back(load_button(item_table));
 
       };
       if (item_table->get_as<std::string>("type")->get() == "sub-menu") {
-        load_submenu(item_table);
+        temp_vector.push_back(load_submenu(item_table));
       };
+    }
+  }
+
+  for (; heightest_nest_lvl > -1; heightest_nest_lvl--) {
+    for (auto& i : temp_vector) {
+      if (i.nest_level == heightest_nest_lvl) {
+        for (auto& j : temp_vector) {
+          if (j.title == i.parent) {
+            j.submenu_array.push_back(i);
+            std::cout << j.title << "  :  " << i.title << std::endl;
+            break;
+          }
+        }
+
+      }
+    }
+  }
+  for (auto i : temp_vector) {
+    if (i.parent == "root") {
+      item_vector.push_back(i);
     }
   }
 }
 
-// takes in a table and creates an BUTTON
+
+// takes in a table and creates a BUTTON
 ITEM load_button(toml::v3::table* tbl) {
   ITEM b;
 
+  b.nest_level = tbl->get_as<int64_t>("nest_level")->get();
   b.title = tbl->get_as<std::string>("title")->get();
-  b.icon_path = tbl->get_as<std::string>("icon_path")->get().c_str();
-  b.launch_command = tbl->get_as<std::string>("command")->get().c_str();
+  b.parent = tbl->get_as<std::string>("parent")->get();
+  b.type = tbl->get_as<std::string>("type")->get();
+  b.icon_path = tbl->get_as<std::string>("icon_path")->get();
+  b.launch_command = tbl->get_as<std::string>("command")->get();
 
-  //std::cout << "we got here ========================" << std::endl;
   return b;
 }
 
-// takes in a table and creates an SUB-MENU
+// takes in a table and creates a SUB-MENU
 ITEM load_submenu(toml::v3::table* tbl) {
   ITEM s;
-  s.title = tbl->get_as<std::string>("title")->get().c_str();
-  s.icon_path = tbl->get_as<std::string>("icon_path")->get().c_str();
+  s.title = tbl->get_as<std::string>("title")->get();
+  s.parent = tbl->get_as<std::string>("parent")->get();
+  s.type = tbl->get_as<std::string>("type")->get();
+  s.icon_path = tbl->get_as<std::string>("icon_path")->get();
 
   return s;
 }

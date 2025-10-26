@@ -5,6 +5,7 @@ ITEM::ITEM() {
   target_angle = 0;
   current_radius = 0;
   target_radius = 0;
+  nest_level = 0;
 
 };
 

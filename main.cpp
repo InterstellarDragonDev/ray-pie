@@ -21,8 +21,15 @@ int main(void) {
   load_settings(settings, tbl);
   load_items(tbl, item_array);
 
-  for (auto item : item_array) {
+  for (auto& item : item_array) {
     std::cout << "There is an item with title: " << item.get_title() << std::endl;
+    if (item.submenu_array.size() > 0) {
+      std::cout << "the following submenus were found:" << std::endl;
+      for (auto& j : item.submenu_array) {
+        std::cout << j.title << std::endl;
+      }
+      std::cout << std::endl;
+    }
   }
 
   while (!WindowShouldClose()) {
@@ -64,6 +71,7 @@ void update_postion() {
 
 void render_items() {
   for (auto i : item_array) {
+    if (i.parent != "root") { continue; };
     Vector2 current_position = polar_to_coords(i.current_radius, i.current_angle);
 
     float theta1, theta2, r1, r2;
@@ -81,5 +89,4 @@ void render_items() {
     DrawCircle(current_position.x, current_position.y, 25, GREEN);
     i.render_line();
   }
-  std::cout << "--------------------------------------------" << std::endl;
 }
