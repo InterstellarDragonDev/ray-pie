@@ -29,8 +29,31 @@ void ITEM::render_line() {
   DrawTexturePro(line_texture, src, dst, origin, angle, { 255, 255, 255, 50 });
 }
 
+void ITEM::render_icon() {
+  Vector2 current_position = polar_to_coords(current_radius, current_angle);
+
+  Rectangle src = { 0, 0, (float)icon_texture.width, (float)icon_texture.height };
+  Vector2 origin = { icon_size / 2, icon_size / 2 };
+
+  Rectangle dst = { current_position.x, current_position.y,  icon_size, icon_size };
+
+  DrawTexturePro(icon_texture, src, dst, origin, 0, WHITE);
+
+
+}
+
 std::string ITEM::get_title() {
   return title;
+}
+
+void ITEM::button_pressed() {
+  std::cout << "A button has been pressed! " << std::endl;
+  std::string cmd = "nohup " + launch_command + " >/dev/null 2>&1 &";
+  std::system(cmd.c_str());
+}
+
+void ITEM::submenu_pressed() {
+  std::cout << "A submenu has been pressed!" << std::endl;
 }
 
 

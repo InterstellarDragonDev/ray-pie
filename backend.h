@@ -27,15 +27,19 @@ public:
   int nest_level;
   std::string title;
   std::string parent;
-  std::string icon_path;
+  Texture2D icon_texture;
+  int icon_size = 60;
   std::string launch_command;
   std::vector<ITEM> submenu_array;
 
+  void submenu_pressed();
+  void button_pressed();
+
   void lerp();
   void render_line();
+  void render_icon();
   std::string get_title();
   ITEM();
-  virtual ~ITEM() = default;
 };
 
 

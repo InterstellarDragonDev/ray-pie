@@ -6,7 +6,7 @@ toml::table tbl;
 std::vector<ITEM> item_array;
 
 void update_postion();
-void render_items();
+int render_items();
 
 const int window_width = 800;
 const int window_height = 800;
@@ -45,7 +45,10 @@ int main(void) {
 
     DrawCircle(400, 400, 30, RED);
     update_postion();
-    render_items();
+    if (render_items() == 1) {
+      EndDrawing();
+      break;
+    }
 
     EndDrawing();
   }
@@ -69,7 +72,7 @@ void update_postion() {
   };
 }
 
-void render_items() {
+int render_items() {
   for (auto i : item_array) {
     if (i.parent != "root") { continue; };
     Vector2 current_position = polar_to_coords(i.current_radius, i.current_angle);
@@ -84,9 +87,16 @@ void render_items() {
 
     if (abs(theta2 - theta1) < PI / item_array.size()) {
       DrawText(i.title.c_str(), current_position.x, (current_position.y < 450) ? current_position.y - 50 : current_position.y + 50, 22, WHITE);
+      if (IsMouseButtonPressed(0)) {
+        std::cout << i.title << " has been pressed" << std::endl;
+        (i.type == "button") ? i.button_pressed() : i.submenu_pressed();
+        return 1;
+      }
     }
 
-    DrawCircle(current_position.x, current_position.y, 25, GREEN);
+    //DrawCircle(current_position.x, current_position.y, 25, GREEN);
     i.render_line();
+    i.render_icon();
   }
+  return 0;
 }

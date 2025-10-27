@@ -142,8 +142,8 @@ ITEM load_button(toml::v3::table* tbl) {
   b.title = tbl->get_as<std::string>("title")->get();
   b.parent = tbl->get_as<std::string>("parent")->get();
   b.type = tbl->get_as<std::string>("type")->get();
-  b.icon_path = tbl->get_as<std::string>("icon_path")->get();
   b.launch_command = tbl->get_as<std::string>("command")->get();
+  b.icon_texture = LoadTexture(tbl->get_as<std::string>("icon_path")->get().c_str());
 
   return b;
 }
@@ -154,7 +154,7 @@ ITEM load_submenu(toml::v3::table* tbl) {
   s.title = tbl->get_as<std::string>("title")->get();
   s.parent = tbl->get_as<std::string>("parent")->get();
   s.type = tbl->get_as<std::string>("type")->get();
-  s.icon_path = tbl->get_as<std::string>("icon_path")->get();
+  s.icon_texture = LoadTexture(tbl->get_as<std::string>("icon_path")->get().c_str());
 
   return s;
 }
