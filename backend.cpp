@@ -15,7 +15,7 @@ void ITEM::lerp() {
 };
 
 void ITEM::render_line() {
-  Vector2 current_position = polar_to_coords(current_radius, current_angle);
+  Vector2 current_position = polar_to_coords(current_radius, current_angle, CENTRE);
 
   Vector2 diff = Vector2Subtract({ 400, 400 }, current_position);
   float length = Vector2Length(diff) - 40;
@@ -29,15 +29,15 @@ void ITEM::render_line() {
   DrawTexturePro(line_texture, src, dst, origin, angle, { 255, 255, 255, 50 });
 }
 
-void ITEM::render_icon() {
-  Vector2 current_position = polar_to_coords(current_radius, current_angle);
+void ITEM::render_icon(Vector2 centre, float scale, Color tint) {
+  Vector2 current_position = polar_to_coords(current_radius, current_angle, centre);
 
   Rectangle src = { 0, 0, (float)icon_texture.width, (float)icon_texture.height };
   Vector2 origin = { icon_size / 2, icon_size / 2 };
 
-  Rectangle dst = { current_position.x, current_position.y,  icon_size, icon_size };
+  Rectangle dst = { current_position.x, current_position.y,  icon_size * scale, icon_size * scale };
 
-  DrawTexturePro(icon_texture, src, dst, origin, 0, WHITE);
+  DrawTexturePro(icon_texture, src, dst, origin, 0, tint);
 
 
 }
@@ -58,12 +58,12 @@ void ITEM::submenu_pressed() {
 
 
 
-void coords_to_polar(Vector2 coords, float& r, float& theta) {
-  coords = Vector2Subtract(coords, { 400, 400 });
+void coords_to_polar(Vector2 coords, float& r, float& theta, Vector2 centre) {
+  coords = Vector2Subtract(coords, centre);
   r = Vector2Length(coords);
   theta = atan2(coords.y, coords.x);
 }
 
-Vector2 polar_to_coords(float r, float theta) {
-  return { r * cos(theta) + 400 , r * sin(theta) + 400 };
+Vector2 polar_to_coords(float r, float theta, Vector2 centre) {
+  return { r * cos(theta) + centre.x , r * sin(theta) + centre.y };
 }

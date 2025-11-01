@@ -69,17 +69,29 @@ void update_postion() {
     item_array[i].target_radius = settings.radius;
     item_array[i].lerp();
 
+    if (item_array[i].submenu_array.size() > 0) {
+
+      float phi = (2 * PI) / item_array.size();
+
+      for (int j = 0; j < item_array[i].submenu_array.size(); j++) {
+        item_array[i].submenu_array[j].target_angle = phi * j;
+        item_array[i].submenu_array[j].target_radius = 55;
+        item_array[i].submenu_array[j].lerp();
+      }
+    }
+
   };
 }
 
 int render_items() {
-  for (auto i : item_array) {
+  for (auto& i : item_array) {
     if (i.parent != "root") { continue; };
-    Vector2 current_position = polar_to_coords(i.current_radius, i.current_angle);
+    Vector2 current_position = polar_to_coords(i.current_radius, i.current_angle, CENTRE);
+    float icon_scale = 1.0f;
 
     float theta1, theta2, r1, r2;
-    coords_to_polar(GetMousePosition(), r1, theta1);
-    coords_to_polar(current_position, r2, theta2);
+    coords_to_polar(GetMousePosition(), r1, theta1, CENTRE);
+    coords_to_polar(current_position, r2, theta2, CENTRE);
 
     // I am doing the extra step of converting to position and then back to polar so that the angle of the item is reduced to -2PI < theta < 2PI
     // else it can be any number and that stuffs up the angle check with the mouse.
@@ -87,6 +99,7 @@ int render_items() {
 
     if (abs(theta2 - theta1) < PI / item_array.size()) {
       DrawText(i.title.c_str(), current_position.x, (current_position.y < 450) ? current_position.y - 50 : current_position.y + 50, 22, WHITE);
+      icon_scale = 1.1f;
       if (IsMouseButtonPressed(0)) {
         std::cout << i.title << " has been pressed" << std::endl;
         (i.type == "button") ? i.button_pressed() : i.submenu_pressed();
@@ -94,9 +107,14 @@ int render_items() {
       }
     }
 
-    //DrawCircle(current_position.x, current_position.y, 25, GREEN);
     i.render_line();
-    i.render_icon();
+    i.render_icon(CENTRE, icon_scale, WHITE);
+
+    if (i.submenu_array.size() > 0) {
+      for (auto& j : i.submenu_array) {
+        j.render_icon(Vector2Add(current_position, { (float)i.icon_size / 2 - 10, (float)i.icon_size / 2 - 10 }), 0.3 * icon_scale, { 255, 255, 255, 50 });
+      }
+    }
   }
   return 0;
 }

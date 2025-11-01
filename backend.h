@@ -16,6 +16,7 @@ ITEM CLASS:
 
 */
 
+
 class ITEM {
 private:
   Texture2D line_texture = LoadTexture("line.png");
@@ -37,18 +38,18 @@ public:
 
   void lerp();
   void render_line();
-  void render_icon();
+  void render_icon(Vector2 centre, float scale, Color tint);
   std::string get_title();
   ITEM();
 };
 
 
 // miscellaneous -------------------------------
-// !! polar_to_coords INCLUDES THE 400 PIXEL SHIFT TO THE CENTRE ALREADY
-void coords_to_polar(Vector2 coords, float& r, float& theta);
-Vector2 polar_to_coords(float r, float theta);
 
+void coords_to_polar(Vector2 coords, float& r, float& theta, Vector2 centre);
+Vector2 polar_to_coords(float r, float theta, Vector2 centre);
 
+const Vector2 CENTRE = { 400, 400 };
 
 struct settings_struct {
   float animate_speed = 0.2;
