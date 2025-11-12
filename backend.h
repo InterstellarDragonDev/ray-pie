@@ -33,7 +33,7 @@ public:
   std::string launch_command;
   std::vector<ITEM> submenu_array;
 
-  void submenu_pressed();
+  void submenu_pressed(std::vector<ITEM>& arr);
   void button_pressed();
 
   void lerp();

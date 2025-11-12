@@ -52,7 +52,8 @@ void ITEM::button_pressed() {
   std::system(cmd.c_str());
 }
 
-void ITEM::submenu_pressed() {
+void ITEM::submenu_pressed(std::vector<ITEM>& arr) {
+  arr = submenu_array;
   std::cout << "A submenu has been pressed!" << std::endl;
 }
 
