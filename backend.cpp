@@ -29,13 +29,13 @@ void ITEM::render_line() {
   DrawTexturePro(line_texture, src, dst, origin, angle, { 255, 255, 255, 50 });
 }
 
-void ITEM::render_icon(Vector2 centre, float scale, Color tint) {
+void ITEM::render_icon(Vector2 centre, Color tint) {
   Vector2 current_position = polar_to_coords(current_radius, current_angle, centre);
 
   Rectangle src = { 0, 0, (float)icon_texture.width, (float)icon_texture.height };
   Vector2 origin = { icon_size / 2, icon_size / 2 };
 
-  Rectangle dst = { current_position.x, current_position.y,  icon_size * scale, icon_size * scale };
+  Rectangle dst = { current_position.x, current_position.y,  icon_size, icon_size };
 
   DrawTexturePro(icon_texture, src, dst, origin, 0, tint);
 

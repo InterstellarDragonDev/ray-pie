@@ -38,7 +38,7 @@ public:
 
   void lerp();
   void render_line();
-  void render_icon(Vector2 centre, float scale, Color tint);
+  void render_icon(Vector2 centre, Color tint);
   std::string get_title();
   ITEM();
 };
@@ -55,7 +55,7 @@ struct settings_struct {
   float animate_speed = 0.2;
   int radius = 250;
   float rotation_offset = 0.0;
-  bool fading = false;
+  float icon_scale = 1.0;
   bool dynamic_movement = false;
   bool centre_pointer = false;
   std::string centre_icon = "";

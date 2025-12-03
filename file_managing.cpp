@@ -73,7 +73,7 @@ int load_settings(settings_struct& settings, toml::table tbl) {
     settings.animate_speed = settings_tbl->get_as<double>("animate_speed")->get();
     settings.radius = settings_tbl->get_as<int64_t>("radius")->get();
     settings.rotation_offset = settings_tbl->get_as<double>("rotation_offset")->get();
-    settings.fading = settings_tbl->get_as<bool>("fading")->get();
+    settings.icon_scale = settings_tbl->get_as<double>("icon_scale")->get();
     settings.dynamic_movement = settings_tbl->get_as<bool>("dynamic_movement")->get();
     settings.centre_pointer = settings_tbl->get_as<bool>("centre_pointer")->get();
     settings.centre_icon = settings_tbl->get_as<std::string>("centre_icon")->get().c_str();
