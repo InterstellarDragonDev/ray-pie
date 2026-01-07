@@ -44,6 +44,11 @@ The template type argument of node::as() must be one of:
 
 #include "backend.h"
 
+
+void create_toml() {
+
+}
+
 // load the toml config file into a table
 int load_toml(toml::table& table) {
 
@@ -52,7 +57,7 @@ int load_toml(toml::table& table) {
     table = toml::parse_file("/home/jonathan/Dev/C++/ray-pie/config.toml");
   }
   catch (const toml::parse_error& err) {
-    std::cerr << err << "\n";
+    std::cerr << "warning there was an error parsing the config file: " << err << "\n";
     return 1;
   }
   return 0;
@@ -154,6 +159,7 @@ ITEM load_submenu(toml::v3::table* tbl) {
   s.title = tbl->get_as<std::string>("title")->get();
   s.parent = tbl->get_as<std::string>("parent")->get();
   s.type = tbl->get_as<std::string>("type")->get();
+  s.rotation = tbl->get_as<double>("rotation")->get();
   s.icon_texture = LoadTexture(tbl->get_as<std::string>("icon_path")->get().c_str());
 
   return s;

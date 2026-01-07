@@ -32,6 +32,7 @@ public:
   int icon_size = 60;
   std::string launch_command;
   std::vector<ITEM> submenu_array;
+  float rotation = 0.0f;
 
   void submenu_pressed(std::vector<ITEM>& arr);
   void button_pressed();

@@ -5,11 +5,14 @@ toml::table tbl;
 
 std::vector<ITEM> item_array;
 std::vector<std::vector<ITEM>*> item_nest;
+std::vector<ITEM*> submenu_nest;
+float current_rotation = 0;
 
 int check_mouse_inputs(ITEM& i, int arr_size);
 void update_postion(ITEM& i, float target_angle);
 void render_items(ITEM& i);
 void print_item_information(std::vector<ITEM>& arr);
+void cleanup_memory(std::vector<ITEM>& i);
 
 const int window_width = 800;
 const int window_height = 800;
@@ -27,29 +30,35 @@ int main(void) {
 
   item_nest.push_back(&item_array);
 
+  current_rotation = settings.rotation_offset;
+
+  // move cursor to centre of screen
+  SetMousePosition(400, 400);
+
 
   while (!WindowShouldClose()) {
 
-    if (IsKeyDown(KEY_A))  settings.rotation_offset -= 0.08;
-    if (IsKeyDown(KEY_D))  settings.rotation_offset += 0.08;
+    if (IsKeyDown(KEY_A))  current_rotation -= 0.08;
+    if (IsKeyDown(KEY_D))  current_rotation += 0.08;
 
+    //std::cout << current_rotation << "\n";
 
     BeginDrawing();
     ClearBackground(BLANK);
 
     // get all items currently needing to be rendered
     auto focused_item_arr = item_nest.back();
+
     float theta = (2 * PI) / focused_item_arr->size();
 
     // loop through the currently focused items and update position + render
     for (int i = 0; i < focused_item_arr->size(); i++) {
 
-      float target_angle = theta * i + PI / focused_item_arr->size() + settings.rotation_offset;
+      float target_angle = theta * i + PI / focused_item_arr->size() + current_rotation;
       int input_return = check_mouse_inputs((*focused_item_arr)[i], focused_item_arr->size());
 
       if (input_return == 1) goto  exit_program;
       if (input_return == 2) break;
-
 
       update_postion((*focused_item_arr)[i], target_angle);
 
@@ -64,7 +73,7 @@ int main(void) {
   }
 
 exit_program:
-  // TODO: add cleanup and freeing of pointers and loaded textures
+  cleanup_memory(item_array);
   CloseWindow();
   return 0;
 }
@@ -76,9 +85,9 @@ int check_mouse_inputs(ITEM& i, int arr_size) {
   Vector2 current_position = polar_to_coords(i.current_radius, i.current_angle, CENTRE);
   float icon_scale = 1.0f;
 
-  float theta1, theta2, r1, r2;
-  coords_to_polar(GetMousePosition(), r1, theta1, CENTRE);
-  coords_to_polar(current_position, r2, theta2, CENTRE);
+  float mouse_theta, item_theta, mouse_radius, item_radius;
+  coords_to_polar(GetMousePosition(), mouse_radius, mouse_theta, CENTRE);
+  coords_to_polar(current_position, item_radius, item_theta, CENTRE);
 
   // I am doing the extra step of converting to position and then back to polar so that the angle of the item is reduced to -2PI < theta < 2PI
   // else it can be any number and that stuffs up the angle check with the mouse.
@@ -86,27 +95,30 @@ int check_mouse_inputs(ITEM& i, int arr_size) {
 
 
 // check if an Item has been pressed and calls the appropriate function
-  if (abs(theta2 - theta1) < PI / arr_size && r1 > settings.radius / 2) {
+  if (abs(item_theta - mouse_theta) < PI / arr_size && mouse_radius > settings.radius / 2) {
     DrawText(i.title.c_str(), current_position.x, (current_position.y < 450) ? current_position.y - 50 : current_position.y + 50, 22, WHITE);
 
     icon_scale = 1.1f;
 
     if (IsMouseButtonPressed(0)) {
-      std::cout << i.title << " has been pressed" << std::endl;
-      // if button has been pressed
+
       if (i.type == "button") {
         i.button_pressed();
         return 1;
       }
       // if submenu has been pressed
+      std::cout << "moved to submenu " << i.title << std::endl;
       item_nest.push_back(&i.submenu_array);
-
-
+      submenu_nest.push_back(&i);
+      current_rotation = i.rotation;
+      // TODO: Fix the mouse position setting to the centre and then triggering the exit as the submenu is loaded
+      //SetMousePosition(400, 400);
+      return 0;
     }
   }
 
   // responsible for closes a submenu or exiting the program if a mouse click happens near the centre
-  if (r1 < settings.radius / 2 && IsMouseButtonPressed(0)) {
+  if (mouse_radius < settings.radius / 2 && IsMouseButtonPressed(0)) {
     // if the item_nest only has one element (that being root) then we can exit if the centre is pressed
     if (item_nest.size() == 1) {
       std::cout << "the exit button has been pressed..." << std::endl;
@@ -115,13 +127,16 @@ int check_mouse_inputs(ITEM& i, int arr_size) {
     else {
       // removing the last item in the nest will push us back to the previously selected item
       item_nest.pop_back();
+      submenu_nest.pop_back();
+      current_rotation = (submenu_nest.size() == 0) ? settings.rotation_offset : submenu_nest.back()->rotation;
+
       std::cout << "moved up the nest stack" << std::endl;
 
       // this ensures that the items get animated when exiting a submenu
       auto temp = item_nest.back();
-      for (int i = 0; i < temp->size(); i++) {
-        (*temp)[i].current_radius = 0;
-        (*temp)[i].current_angle = 0;
+      for (int j = 0; j < temp->size(); j++) {
+        (*temp)[j].current_radius = 0;
+        (*temp)[j].current_angle = 0;
       }
       return 2;
     }
@@ -140,7 +155,19 @@ void update_postion(ITEM& i, float target_angle) {
   //std::cout << "Beginning Position Update" << std::endl;
   i.target_angle = target_angle;
   i.target_radius = settings.radius;
+
+
+  Vector2 current_position = polar_to_coords(i.current_radius, i.current_angle, CENTRE);
+  float mouse_theta, item_theta, mouse_radius, item_radius;
+  coords_to_polar(GetMousePosition(), mouse_radius, mouse_theta, CENTRE);
+  coords_to_polar(current_position, item_radius, item_theta, CENTRE);
+  // if (item_theta < 0) { item_theta += 2 * PI; }
+  // if (mouse_theta < 0) { mouse_theta += 2 * PI; }
+  i.target_radius += (1 - abs(abs(item_theta) - abs(mouse_theta))) * Vector2Distance({ 400, 400 }, GetMousePosition()) / 20;
+
   i.lerp();
+
+
 
   if (i.submenu_array.size() > 0) {
 
@@ -173,6 +200,15 @@ void render_items(ITEM& i) {
   //std::cout << "Rendering Complete." << std::endl;
 }
 
+// This is a shit way to do it. it should be done via destructor of each item but I'm kinda lazy
+void cleanup_memory(std::vector<ITEM>& i) {
+  for (auto& item : i) {
+    if (item.submenu_array.size() > 0) {
+      cleanup_memory(item.submenu_array);
+    }
+    UnloadTexture(item.icon_texture);
+  }
+}
 
 
 void print_item_information(std::vector<ITEM>& arr) {
