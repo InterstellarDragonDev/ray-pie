@@ -38,10 +38,8 @@ int main(void) {
 
   while (!WindowShouldClose()) {
 
-    if (IsKeyDown(KEY_A))  current_rotation -= 0.08;
-    if (IsKeyDown(KEY_D))  current_rotation += 0.08;
-
-    //std::cout << current_rotation << "\n";
+    if (IsKeyDown(KEY_A)) { current_rotation -= 0.08; std::cout << current_rotation << std::endl; }
+    if (IsKeyDown(KEY_D)) { current_rotation += 0.08; std::cout << current_rotation << std::endl; }
 
     BeginDrawing();
     ClearBackground(BLANK);
@@ -111,9 +109,8 @@ int check_mouse_inputs(ITEM& i, int arr_size) {
       item_nest.push_back(&i.submenu_array);
       submenu_nest.push_back(&i);
       current_rotation = i.rotation;
-      // TODO: Fix the mouse position setting to the centre and then triggering the exit as the submenu is loaded
-      //SetMousePosition(400, 400);
-      return 0;
+      SetMousePosition(400, 400);
+      return 2;
     }
   }
 
