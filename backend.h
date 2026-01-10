@@ -8,6 +8,7 @@
 #include <iostream>
 #include <vector>
 #include <memory>
+#include "images.h"
 
 /*
 ITEM CLASS:
@@ -19,7 +20,12 @@ ITEM CLASS:
 
 class ITEM {
 private:
-  Texture2D line_texture = LoadTexture("line.png");
+  Image img = LoadImageFromMemory(
+    ".png",              // file type
+    line,
+    line_length
+  );
+
 
 public:
   float current_radius, target_radius;
@@ -29,6 +35,7 @@ public:
   std::string title;
   std::string parent;
   Texture2D icon_texture;
+  Texture2D line_texture = LoadTextureFromImage(img);
   int icon_size = 60;
   std::string launch_command;
   std::vector<ITEM> submenu_array;

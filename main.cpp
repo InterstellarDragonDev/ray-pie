@@ -204,6 +204,7 @@ void cleanup_memory(std::vector<ITEM>& i) {
       cleanup_memory(item.submenu_array);
     }
     UnloadTexture(item.icon_texture);
+    UnloadTexture(item.line_texture);
   }
 }
 
