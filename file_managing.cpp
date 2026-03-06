@@ -54,7 +54,16 @@ int load_toml(toml::table& table) {
 
   try {
     // read from a file
-    table = toml::parse_file("/home/jonathan/Dev/C++/ray-pie/config.toml");
+    const char* homedir = std::getenv("HOME");
+
+    if (!homedir) {
+      throw std::runtime_error("HOME environment variable not set");
+    }
+
+    std::string path = std::string(homedir) + "/.config/ray-pie/config.toml";
+
+    table = toml::parse_file(path);
+    //table = toml::parse_file("/home/jonathan/Dev/C++/ray-pie/config.toml");
   }
   catch (const toml::parse_error& err) {
     std::cerr << "warning there was an error parsing the config file: " << err << "\n";
