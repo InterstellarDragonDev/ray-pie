@@ -44,11 +44,23 @@ The template type argument of node::as() must be one of:
 
 #include "backend.h"
 
+SaveConfig get_config_file() {
+  const char* homedir = std::getenv("HOME");
 
-void create_toml() {
+  if (!homedir) {
+    throw std::runtime_error("HOME environment variable not set");
+  }
 
+  std::string path = std::string(homedir) + "/.config/ray-pie/config.toml";
+
+  std::ifstream inFile(path);
+  json loadedJson;
+  inFile >> loadedJson;
+
+  return loadedJson.get<SaveConfig>();
 }
 
+/*
 // load the toml config file into a table
 int load_toml(toml::table& table) {
 
@@ -174,3 +186,4 @@ ITEM load_submenu(toml::v3::table* tbl) {
   return s;
 }
 
+*/

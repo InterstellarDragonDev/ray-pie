@@ -23,9 +23,12 @@ int main(void) {
   SetTargetFPS(60);
 
   // load everything from the config file
-  load_toml(tbl);
-  load_settings(settings, tbl);
-  load_items(tbl, item_array);
+  // load_toml(tbl);
+  // load_settings(settings, tbl);
+  // load_items(tbl, item_array);
+  SaveConfig save = get_config_file();
+  item_array = save.item_vector;
+  settings = save.settings;
 
 
   item_nest.push_back(&item_array);
