@@ -5,8 +5,6 @@ ITEM::ITEM() {
   target_angle = 0;
   current_radius = 0;
   target_radius = 0;
-  nest_level = 0;
-
 };
 
 void ITEM::lerp() {
@@ -40,6 +38,11 @@ void ITEM::render_icon(Vector2 centre, Color tint) {
   DrawTexturePro(icon_texture, src, dst, origin, 0, tint);
 
 
+}
+
+void ITEM::load_textures() {
+  icon_texture = LoadTexture(icon_path.c_str());
+  for (ITEM &i : submenu_array) {i.load_textures();};
 }
 
 std::string ITEM::get_title() {

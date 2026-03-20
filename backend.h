@@ -3,13 +3,15 @@
 
 #include "raylib.h"
 #include "raymath.h"
-#include "toml.hpp"
 #include <cmath>
 #include <iostream>
 #include <vector>
 #include <memory>
+#include <fstream>
 #include "images.h"
+#include "json.hpp"
 
+using json = nlohmann::json;
 /*
 ITEM CLASS:
   all coords are saved in polar form and converted for frame to be rendered.
@@ -31,10 +33,9 @@ public:
   float current_radius, target_radius;
   float current_angle, target_angle;
   std::string type;
-  int nest_level;
   std::string title;
-  std::string parent;
   Texture2D icon_texture;
+  std::string icon_path;
   Texture2D line_texture = LoadTextureFromImage(img);
   int icon_size = 60;
   std::string launch_command;
@@ -43,12 +44,14 @@ public:
 
   void submenu_pressed(std::vector<ITEM>& arr);
   void button_pressed();
+  void load_textures();
 
   void lerp();
   void render_line();
   void render_icon(Vector2 centre, Color tint);
   std::string get_title();
   ITEM();
+  NLOHMANN_DEFINE_TYPE_INTRUSIVE(ITEM, type, title, rotation, icon_path, icon_size, launch_command, submenu_array)
 };
 
 
@@ -67,15 +70,19 @@ struct settings_struct {
   bool dynamic_movement = false;
   bool centre_pointer = false;
   std::string centre_icon = "";
+  NLOHMANN_DEFINE_TYPE_INTRUSIVE(settings_struct, animate_speed, radius, rotation_offset, icon_scale, dynamic_movement, centre_pointer, centre_icon)
+};
+
+class SaveConfig {
+public:
+  settings_struct settings;
+  std::vector<ITEM> item_vector;
+  NLOHMANN_DEFINE_TYPE_INTRUSIVE(SaveConfig, settings, item_vector)
 };
 
 // File Reading & Saving
 // ---------------------------------------------------------
-int load_toml(toml::table& table);
-int load_settings(settings_struct& settings, toml::table tbl);
+SaveConfig get_config_file();
 
-void load_items(toml::table tbl, std::vector<ITEM>& item_vector);
-ITEM load_button(toml::v3::table* tbl);
-ITEM load_submenu(toml::v3::table* tbl);
 
 #endif
