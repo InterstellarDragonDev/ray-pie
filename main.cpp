@@ -1,7 +1,6 @@
 #include "backend.h"
 
 settings_struct settings;
-toml::table tbl;
 
 std::vector<ITEM> item_array;
 std::vector<std::vector<ITEM>*> item_nest;
