@@ -1,0 +1,214 @@
+{
+    "item_vector": [
+        {
+            "icon_path": "",
+            "icon_size": 60,
+            "nest_level": 0,
+            "parent": "root",
+            "submenu_array": [],
+            "title": "Firefox",
+            "type": "button"
+        },
+        {
+            "icon_path": "",
+            "icon_size": 60,
+            "nest_level": 0,
+            "parent": "root",
+            "submenu_array": [],
+            "title": "Thunar",
+            "type": "button"
+        },
+        {
+            "icon_path": "",
+            "icon_size": 60,
+            "nest_level": 0,
+            "parent": "root",
+            "submenu_array": [
+                {
+                    "icon_path": "",
+                    "icon_size": 60,
+                    "nest_level": 1,
+                    "parent": "Graphics/Gaming",
+                    "submenu_array": [],
+                    "title": "Blender",
+                    "type": "button"
+                },
+                {
+                    "icon_path": "",
+                    "icon_size": 60,
+                    "nest_level": 1,
+                    "parent": "Graphics/Gaming",
+                    "submenu_array": [],
+                    "title": "Steam",
+                    "type": "button"
+                },
+                {
+                    "icon_path": "",
+                    "icon_size": 60,
+                    "nest_level": 1,
+                    "parent": "Graphics/Gaming",
+                    "submenu_array": [],
+                    "title": "Minecraft",
+                    "type": "button"
+                },
+                {
+                    "icon_path": "",
+                    "icon_size": 60,
+                    "nest_level": 1,
+                    "parent": "Graphics/Gaming",
+                    "submenu_array": [],
+                    "title": "Lutris",
+                    "type": "button"
+                },
+                {
+                    "icon_path": "",
+                    "icon_size": 60,
+                    "nest_level": 1,
+                    "parent": "Graphics/Gaming",
+                    "submenu_array": [],
+                    "title": "Krita",
+                    "type": "button"
+                },
+                {
+                    "icon_path": "",
+                    "icon_size": 60,
+                    "nest_level": 1,
+                    "parent": "Graphics/Gaming",
+                    "submenu_array": [],
+                    "title": "Davinci Resolve",
+                    "type": "button"
+                }
+            ],
+            "title": "Graphics/Gaming",
+            "type": "sub-menu"
+        },
+        {
+            "icon_path": "",
+            "icon_size": 60,
+            "nest_level": 0,
+            "parent": "root",
+            "submenu_array": [
+                {
+                    "icon_path": "",
+                    "icon_size": 60,
+                    "nest_level": 1,
+                    "parent": "Personal",
+                    "submenu_array": [],
+                    "title": "Whatsapp",
+                    "type": "button"
+                },
+                {
+                    "icon_path": "",
+                    "icon_size": 60,
+                    "nest_level": 1,
+                    "parent": "Personal",
+                    "submenu_array": [],
+                    "title": "Qbittorrent",
+                    "type": "button"
+                },
+                {
+                    "icon_path": "",
+                    "icon_size": 60,
+                    "nest_level": 1,
+                    "parent": "Personal",
+                    "submenu_array": [],
+                    "title": "OBS",
+                    "type": "button"
+                },
+                {
+                    "icon_path": "",
+                    "icon_size": 60,
+                    "nest_level": 1,
+                    "parent": "Personal",
+                    "submenu_array": [],
+                    "title": "Sayonara",
+                    "type": "button"
+                },
+                {
+                    "icon_path": "",
+                    "icon_size": 60,
+                    "nest_level": 1,
+                    "parent": "Personal",
+                    "submenu_array": [],
+                    "title": "Discord",
+                    "type": "button"
+                },
+                {
+                    "icon_path": "",
+                    "icon_size": 60,
+                    "nest_level": 1,
+                    "parent": "Personal",
+                    "submenu_array": [],
+                    "title": "Vivaldi",
+                    "type": "button"
+                }
+            ],
+            "title": "Personal",
+            "type": "sub-menu"
+        },
+        {
+            "icon_path": "",
+            "icon_size": 60,
+            "nest_level": 0,
+            "parent": "root",
+            "submenu_array": [
+                {
+                    "icon_path": "",
+                    "icon_size": 60,
+                    "nest_level": 1,
+                    "parent": "Dev",
+                    "submenu_array": [],
+                    "title": "VS Code",
+                    "type": "button"
+                },
+                {
+                    "icon_path": "",
+                    "icon_size": 60,
+                    "nest_level": 1,
+                    "parent": "Dev",
+                    "submenu_array": [],
+                    "title": "Kate",
+                    "type": "button"
+                },
+                {
+                    "icon_path": "",
+                    "icon_size": 60,
+                    "nest_level": 1,
+                    "parent": "Dev",
+                    "submenu_array": [],
+                    "title": "Virtual Box",
+                    "type": "button"
+                },
+                {
+                    "icon_path": "",
+                    "icon_size": 60,
+                    "nest_level": 1,
+                    "parent": "Dev",
+                    "submenu_array": [],
+                    "title": "Arduino IDE",
+                    "type": "button"
+                },
+                {
+                    "icon_path": "",
+                    "icon_size": 60,
+                    "nest_level": 1,
+                    "parent": "Dev",
+                    "submenu_array": [],
+                    "title": "Godot 4",
+                    "type": "button"
+                }
+            ],
+            "title": "Dev",
+            "type": "sub-menu"
+        }
+    ],
+    "settings": {
+        "animate_speed": 0.5,
+        "centre_icon": "res://icon.svg",
+        "centre_pointer": false,
+        "dynamic_movement": true,
+        "icon_scale": 1.0,
+        "radius": 250,
+        "rotation_offset": -2.2200000286102295
+    }
+}

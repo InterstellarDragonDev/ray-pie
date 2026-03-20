@@ -22,14 +22,10 @@ int main(void) {
   InitWindow(window_width, window_height, "ray-pie");
   SetTargetFPS(60);
 
-  // load everything from the config file
-  // load_toml(tbl);
-  // load_settings(settings, tbl);
-  // load_items(tbl, item_array);
   SaveConfig save = get_config_file();
   item_array = save.item_vector;
   settings = save.settings;
-
+  for (ITEM &i : item_array) {i.load_textures();};
 
   item_nest.push_back(&item_array);
 

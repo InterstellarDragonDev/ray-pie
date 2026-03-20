@@ -10,6 +10,7 @@
 #include <fstream>
 #include "images.h"
 #include "json.hpp"
+#include "toml.hpp"
 
 using json = nlohmann::json;
 /*
@@ -33,11 +34,9 @@ public:
   float current_radius, target_radius;
   float current_angle, target_angle;
   std::string type;
-  int nest_level;
   std::string title;
-  std::string parent;
   Texture2D icon_texture;
-  const char* icon_path;
+  std::string icon_path;
   Texture2D line_texture = LoadTextureFromImage(img);
   int icon_size = 60;
   std::string launch_command;
@@ -46,13 +45,14 @@ public:
 
   void submenu_pressed(std::vector<ITEM>& arr);
   void button_pressed();
+  void load_textures();
 
   void lerp();
   void render_line();
   void render_icon(Vector2 centre, Color tint);
   std::string get_title();
   ITEM();
-  NLOHMANN_DEFINE_TYPE_INTRUSIVE(ITEM, type, nest_level, title, parent, icon_path, icon_size, submenu_array)
+  NLOHMANN_DEFINE_TYPE_INTRUSIVE(ITEM, type, title, rotation, icon_path, icon_size, launch_command, submenu_array)
 };
 
 
@@ -84,5 +84,6 @@ public:
 // File Reading & Saving
 // ---------------------------------------------------------
 SaveConfig get_config_file();
+
 
 #endif
