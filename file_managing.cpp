@@ -70,6 +70,7 @@ std::string get_config_path() {
   if (!homedir) {
     throw std::runtime_error("HOME environment variable not set");
   }
+  std::filesystem::create_directory(std::string(homedir) + "/.config/ray-pie");
 
   return std::string(homedir) + "/.config/ray-pie/config.json";
 }

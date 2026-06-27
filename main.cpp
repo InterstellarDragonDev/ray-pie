@@ -16,7 +16,14 @@ void cleanup_memory(std::vector<ITEM>& i);
 const int window_width = 800;
 const int window_height = 800;
 
-int main(void) {
+// TODO: add svg support, add support for loading, add a default image for buttons and submenu's, 
+
+int main(int argc, char* argv[]) {
+  if (argc > 1) {
+    if (std::string_view (argv[1]) == "edit") {
+      // Enter the edit state from here
+    }
+  }
   SetConfigFlags(FLAG_WINDOW_TRANSPARENT);
   InitWindow(window_width, window_height, "ray-pie");
   SetTargetFPS(60);

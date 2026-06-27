@@ -9,9 +9,17 @@
 #include <memory>
 #include <fstream>
 #include "images.h"
+#include <filesystem> 
 #include "json.hpp"
+#include "nanosvg.h"
+#include "nanosvgrast.h"
 
 using json = nlohmann::json;
+
+
+// helper function to load SVG as an image
+Image LoadSVGImage(const char* filename, int targetWidth);
+
 /*
 ITEM CLASS:
   all coords are saved in polar form and converted for frame to be rendered.
@@ -22,7 +30,7 @@ ITEM CLASS:
 
 class ITEM {
 private:
-  Image img = LoadImageFromMemory(
+  Image line_img = LoadImageFromMemory(
     ".png",              // file type
     line,
     line_length
@@ -36,7 +44,7 @@ public:
   std::string title;
   Texture2D icon_texture;
   std::string icon_path;
-  Texture2D line_texture = LoadTextureFromImage(img);
+  Texture2D line_texture = LoadTextureFromImage(line_img);
   int icon_size = 60;
   std::string launch_command;
   std::vector<ITEM> submenu_array;
@@ -83,6 +91,7 @@ public:
 // File Reading & Saving
 // ---------------------------------------------------------
 SaveConfig get_config_file();
+
 
 
 #endif
