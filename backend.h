@@ -20,13 +20,14 @@ using json = nlohmann::json;
 // helper function to load SVG as an image
 Image LoadSVGImage(const char* filename, int targetWidth);
 
+inline Vector2 MENU_CENTRE = {400, 400};
+inline int GLOBAL_SCALE = 1;
 /*
 ITEM CLASS:
   all coords are saved in polar form and converted for frame to be rendered.
 
 
 */
-
 
 class ITEM {
 private:
@@ -59,6 +60,7 @@ public:
   void render_icon(Vector2 centre, Color tint);
   std::string get_title();
   ITEM();
+  ~ITEM();
   NLOHMANN_DEFINE_TYPE_INTRUSIVE(ITEM, type, title, rotation, icon_path, icon_size, launch_command, submenu_array)
 };
 
@@ -68,7 +70,6 @@ public:
 void coords_to_polar(Vector2 coords, float& r, float& theta, Vector2 centre);
 Vector2 polar_to_coords(float r, float theta, Vector2 centre);
 
-const Vector2 CENTRE = { 400, 400 };
 
 struct settings_struct {
   float animate_speed = 0.2;

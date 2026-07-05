@@ -11,6 +11,10 @@ ITEM::ITEM() {
   current_radius = 0;
   target_radius = 0;
 };
+ITEM::~ITEM() {
+  UnloadTexture(icon_texture);
+  std::cout << "unloaded " << title << "'s texture successfully" << std::endl;
+}
 
 void ITEM::lerp() {
   current_angle = Lerp(current_angle, target_angle, 0.2);
@@ -18,9 +22,9 @@ void ITEM::lerp() {
 };
 
 void ITEM::render_line() {
-  Vector2 current_position = polar_to_coords(current_radius, current_angle, CENTRE);
+  Vector2 current_position = polar_to_coords(current_radius, current_angle, MENU_CENTRE);
 
-  Vector2 diff = Vector2Subtract({ 400, 400 }, current_position);
+  Vector2 diff = Vector2Subtract(MENU_CENTRE, current_position);
   float length = Vector2Length(diff) - 40;
   float angle = atan2f(diff.y, diff.x) * RAD2DEG;
 

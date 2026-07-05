@@ -165,5 +165,4 @@ ray-pie/
 ## Notes
 
 - Commands are launched with `nohup ... >/dev/null 2>&1 &` so they detach from the launcher process
-- Memory cleanup for textures is currently done manually in `cleanup_memory()` rather than via destructors
 - The window is fixed at 800×800 with the menu centred at (400, 400)

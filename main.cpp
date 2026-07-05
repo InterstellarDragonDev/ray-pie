@@ -31,14 +31,17 @@ int main(int argc, char* argv[]) {
   SaveConfig save = get_config_file();
   item_array = save.item_vector;
   settings = save.settings;
+
   for (ITEM &i : item_array) {i.load_textures();};
+
 
   item_nest.push_back(&item_array);
 
   current_rotation = settings.rotation_offset;
 
   // move cursor to centre of screen
-  SetMousePosition(400, 400);
+  SetMousePosition(MENU_CENTRE.x, MENU_CENTRE.y);
+
 
 
   while (!WindowShouldClose()) {
@@ -69,14 +72,13 @@ int main(int argc, char* argv[]) {
       render_items((*focused_item_arr)[i]);
     }
 
-    DrawCircle(400, 400, 30, RED);
+    DrawCircle(MENU_CENTRE.x, MENU_CENTRE.y, 30, RED);
 
 
     EndDrawing();
   }
 
 exit_program:
-  cleanup_memory(item_array);
   CloseWindow();
   return 0;
 }
@@ -85,12 +87,12 @@ int check_mouse_inputs(ITEM& i, int arr_size) {
 
   //std::cout << "Beginning Input Check" << std::endl;
 
-  Vector2 current_position = polar_to_coords(i.current_radius, i.current_angle, CENTRE);
+  Vector2 current_position = polar_to_coords(i.current_radius, i.current_angle, MENU_CENTRE);
   float icon_scale = 1.0f;
 
   float mouse_theta, item_theta, mouse_radius, item_radius;
-  coords_to_polar(GetMousePosition(), mouse_radius, mouse_theta, CENTRE);
-  coords_to_polar(current_position, item_radius, item_theta, CENTRE);
+  coords_to_polar(GetMousePosition(), mouse_radius, mouse_theta, MENU_CENTRE);
+  coords_to_polar(current_position, item_radius, item_theta, MENU_CENTRE);
 
   // I am doing the extra step of converting to position and then back to polar so that the angle of the item is reduced to -2PI < theta < 2PI
   // else it can be any number and that stuffs up the angle check with the mouse.
@@ -114,7 +116,7 @@ int check_mouse_inputs(ITEM& i, int arr_size) {
       item_nest.push_back(&i.submenu_array);
       submenu_nest.push_back(&i);
       current_rotation = i.rotation;
-      SetMousePosition(400, 400);
+      SetMousePosition(MENU_CENTRE.x, MENU_CENTRE.y);
       return 2;
     }
   }
@@ -144,7 +146,7 @@ int check_mouse_inputs(ITEM& i, int arr_size) {
     }
   }
 
-  i.icon_size = (int)Lerp(i.icon_size, icon_scale * 60, 0.2);
+  i.icon_size = (int)Lerp(i.icon_size, icon_scale * GLOBAL_SCALE * 60, 0.2);
 
   //std::cout << "Input Checking Has Been Complete" << std::endl;
   return 0;
@@ -159,13 +161,11 @@ void update_postion(ITEM& i, float target_angle) {
   i.target_radius = settings.radius;
 
 
-  Vector2 current_position = polar_to_coords(i.current_radius, i.current_angle, CENTRE);
+  Vector2 current_position = polar_to_coords(i.current_radius, i.current_angle, MENU_CENTRE);
   float mouse_theta, item_theta, mouse_radius, item_radius;
-  coords_to_polar(GetMousePosition(), mouse_radius, mouse_theta, CENTRE);
-  coords_to_polar(current_position, item_radius, item_theta, CENTRE);
-  // if (item_theta < 0) { item_theta += 2 * PI; }
-  // if (mouse_theta < 0) { mouse_theta += 2 * PI; }
-  i.target_radius += (1 - abs(abs(item_theta) - abs(mouse_theta))) * Vector2Distance({ 400, 400 }, GetMousePosition()) / 20;
+  coords_to_polar(GetMousePosition(), mouse_radius, mouse_theta, MENU_CENTRE);
+  coords_to_polar(current_position, item_radius, item_theta, MENU_CENTRE);
+  i.target_radius += (1 - abs(abs(item_theta) - abs(mouse_theta))) * Vector2Distance({ MENU_CENTRE.x, MENU_CENTRE.y}, GetMousePosition()) / 20;
 
   i.lerp();
 
@@ -187,10 +187,10 @@ void update_postion(ITEM& i, float target_angle) {
 // main function that loops through all items and renders them
 void render_items(ITEM& i) {
   //std::cout << "Beginning Rendering" << std::endl;
-  Vector2 current_position = polar_to_coords(i.current_radius, i.current_angle, CENTRE);
+  Vector2 current_position = polar_to_coords(i.current_radius, i.current_angle, MENU_CENTRE);
 
   i.render_line();
-  i.render_icon(CENTRE, WHITE);
+  i.render_icon(MENU_CENTRE, WHITE);
 
   // render the submenu icons around the submenu as a preview
   if (i.submenu_array.size() > 0) {
@@ -200,17 +200,6 @@ void render_items(ITEM& i) {
     }
   }
   //std::cout << "Rendering Complete." << std::endl;
-}
-
-// This is a shit way to do it. it should be done via destructor of each item but I'm kinda lazy
-void cleanup_memory(std::vector<ITEM>& i) {
-  for (auto& item : i) {
-    if (item.submenu_array.size() > 0) {
-      cleanup_memory(item.submenu_array);
-    }
-    UnloadTexture(item.icon_texture);
-    UnloadTexture(item.line_texture);
-  }
 }
 
 
