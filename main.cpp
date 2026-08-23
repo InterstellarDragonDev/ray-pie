@@ -1,58 +1,40 @@
 #include "backend.h"
 
-settings_struct settings;
 
-std::vector<ITEM> item_array;
-std::vector<std::vector<ITEM>*> item_nest;
-std::vector<ITEM*> submenu_nest;
-float current_rotation = 0;
+class RadialMenu {
 
-int check_mouse_inputs(ITEM& i, int arr_size);
-void update_postion(ITEM& i, float target_angle);
-void render_items(ITEM& i);
-void print_item_information(std::vector<ITEM>& arr);
-void cleanup_memory(std::vector<ITEM>& i);
+public:
+  settings_struct settings;
 
-const int window_width = 800;
-const int window_height = 800;
+  std::vector<ITEM> item_array;
+  std::vector<std::vector<ITEM>*> item_nest;
+  std::vector<ITEM*> submenu_nest;
+  float current_rotation = 0;
 
-// TODO: add svg support, add support for loading, add a default image for buttons and submenu's, 
+  int check_mouse_inputs(ITEM& i, int arr_size);
+  void update_postion(ITEM& i, float target_angle);
+  void render_items(ITEM& i);
 
-int main(int argc, char* argv[]) {
-  if (argc > 1) {
-    if (std::string_view (argv[1]) == "edit") {
-      // Enter the edit state from here
-    }
-  }
-  SetConfigFlags(FLAG_WINDOW_TRANSPARENT);
-  InitWindow(window_width, window_height, "ray-pie");
-  SetTargetFPS(60);
+  int draw();
 
+  void print_item_information(std::vector<ITEM>& arr);
+  RadialMenu();
+};
+
+RadialMenu::RadialMenu() {
   SaveConfig save = get_config_file();
   item_array = save.item_vector;
   settings = save.settings;
 
   for (ITEM &i : item_array) {i.load_textures();};
-
-
   item_nest.push_back(&item_array);
-
   current_rotation = settings.rotation_offset;
 
-  // move cursor to centre of screen
   SetMousePosition(MENU_CENTRE.x, MENU_CENTRE.y);
+}
 
-
-
-  while (!WindowShouldClose()) {
-
-    if (IsKeyDown(KEY_A)) { current_rotation -= 0.08; std::cout << current_rotation << std::endl; }
-    if (IsKeyDown(KEY_D)) { current_rotation += 0.08; std::cout << current_rotation << std::endl; }
-
-    BeginDrawing();
-    ClearBackground(BLANK);
-
-    // get all items currently needing to be rendered
+int RadialMenu::draw() {
+   // get all items currently needing to be rendered
     auto focused_item_arr = item_nest.back();
 
     float theta = (2 * PI) / focused_item_arr->size();
@@ -63,8 +45,8 @@ int main(int argc, char* argv[]) {
       float target_angle = theta * i + PI / focused_item_arr->size() + current_rotation;
       int input_return = check_mouse_inputs((*focused_item_arr)[i], focused_item_arr->size());
 
-      if (input_return == 1) goto  exit_program;
-      if (input_return == 2) break;
+      if (input_return == 1) return 1;
+      if (input_return == 2) return 2;
 
       update_postion((*focused_item_arr)[i], target_angle);
 
@@ -73,6 +55,39 @@ int main(int argc, char* argv[]) {
     }
 
     DrawCircle(MENU_CENTRE.x, MENU_CENTRE.y, 30, RED);
+    return 0;
+  
+}
+
+
+int window_width = 800;
+int window_height = 800;
+
+int main(int argc, char* argv[]) {
+  char *window_name = "ray-pie";
+  if (argc > 1) {
+    if (std::string_view (argv[1]) == "edit") {
+      window_width = 1400;
+      MENU_CENTRE.x = 1000;
+      window_name = "ray-pie configuration";
+    }
+  }
+  SetConfigFlags(FLAG_WINDOW_TRANSPARENT);
+  InitWindow(window_width, window_height, window_name);
+  SetTargetFPS(60);
+
+  RadialMenu menu;
+
+
+  while (!WindowShouldClose()) {
+
+    if (IsKeyDown(KEY_A)) {  menu.current_rotation -= 0.08; std::cout << menu.current_rotation << std::endl; }
+    if (IsKeyDown(KEY_D)) { menu.current_rotation += 0.08; std::cout << menu.current_rotation << std::endl; }
+
+    BeginDrawing();
+    ClearBackground(BLANK);
+
+    if (menu.draw() == 1) {goto  exit_program;};
 
 
     EndDrawing();
@@ -83,7 +98,7 @@ exit_program:
   return 0;
 }
 
-int check_mouse_inputs(ITEM& i, int arr_size) {
+int RadialMenu::check_mouse_inputs(ITEM& i, int arr_size) {
 
   //std::cout << "Beginning Input Check" << std::endl;
 
@@ -155,7 +170,7 @@ int check_mouse_inputs(ITEM& i, int arr_size) {
 
 
 
-void update_postion(ITEM& i, float target_angle) {
+void RadialMenu::update_postion(ITEM& i, float target_angle) {
   //std::cout << "Beginning Position Update" << std::endl;
   i.target_angle = target_angle;
   i.target_radius = settings.radius;
@@ -185,7 +200,7 @@ void update_postion(ITEM& i, float target_angle) {
 
 }
 // main function that loops through all items and renders them
-void render_items(ITEM& i) {
+void RadialMenu::render_items(ITEM& i) {
   //std::cout << "Beginning Rendering" << std::endl;
   Vector2 current_position = polar_to_coords(i.current_radius, i.current_angle, MENU_CENTRE);
 
@@ -203,7 +218,7 @@ void render_items(ITEM& i) {
 }
 
 
-void print_item_information(std::vector<ITEM>& arr) {
+void RadialMenu::print_item_information(std::vector<ITEM>& arr) {
 
   for (auto& item : arr) {
     std::cout << "There is an item with title: " << item.get_title() << std::endl;
