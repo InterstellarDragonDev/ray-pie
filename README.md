@@ -135,7 +135,7 @@ Each item in `item_vector` has the following fields:
     }
   ],
   "settings": {
-    "animate_speed": 0.20000000298023224,
+    "animate_speed": 0.2,
     "centre_icon": "",
     "centre_pointer": false,
     "dynamic_movement": false,
