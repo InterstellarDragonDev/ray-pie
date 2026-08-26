@@ -13,6 +13,8 @@
 #include "json.hpp"
 #include "nanosvg.h"
 #include "nanosvgrast.h"
+#include <unistd.h>
+#include <limits.h>
 
 using json = nlohmann::json;
 
@@ -82,7 +84,7 @@ public:
 };
 
 
-// miscellaneous -------------------------------
+// miscellaneous ------------------------------------------------------------------------
 
 void coords_to_polar(Vector2 coords, float& r, float& theta, Vector2 centre);
 Vector2 polar_to_coords(float r, float theta, Vector2 centre);
@@ -146,7 +148,25 @@ public:
 
   void print_item_information(std::vector<ITEM>& arr);
   RadialMenu();
+  void reset();
+  void init();
 };
+
+
+std::filesystem::path get_executable_path();
+int check_key_inputs(RadialMenu *menu);
+
+
+/* Edit Mode */
+// ------------------------------------------------------------------------------------------------------
+
+inline ITEM *edit_focus = nullptr;
+
+void save_button(void* menu);
+void add_to_current_button();
+void update_button();
+void settings_button();
+void new_item_button();
 
 
 #endif

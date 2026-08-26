@@ -1,0 +1,35 @@
+#
+# rgl layout text file (v4.0) - raygui layout file generated using rGuiLayout
+#
+# Number of controls:     25
+#
+# Ref. window:    r <x> <y> <width> <height>
+# Anchor info:    a <id> <name> <posx> <posy> <enabled>
+# Control info:   c <id> <type> <name> <rectangle> <anchor_id> <text>
+#
+r 0 40 -1 -1
+c 000 12 title_box 136 40 512 32 0 Title
+c 001 13 TextmultiBox001 48 104 0 0 0 SAMPLE TEXT
+c 002 13 TextmultiBox002 48 128 0 0 0 SAMPLE TEXT
+c 003 12 icon_path_box 136 88 512 32 0 Icon Path
+c 004 12 launch_command_box 136 136 512 32 0 Launch Command
+c 005 4 Label005 8 40 120 32 0 Title
+c 006 4 Label006 8 88 120 32 0 Icon Path
+c 007 4 Label007 8 136 120 32 0 Launch Command
+c 008 15 icon_size_spn 136 192 160 24 0 
+c 009 4 Label009 8 192 120 24 0 Icon Size
+c 010 4 Label011 8 232 120 24 0 Submenu Rotation
+c 011 5 save_button 8 384 136 40 0 Save New Config
+c 012 2 Line013 8 264 640 16 0 
+c 013 5 add_to_current_button 8 336 136 40 0 Add Item To Current
+c 014 15 submenu_rotation_spn 136 232 160 24 0 
+c 015 5 update_button 8 288 136 40 0 Update
+c 016 4 Label016 320 192 144 24 0 In Pixels (Default 60)
+c 017 4 Label017 320 232 144 24 0 In Degrees (Default 0)
+c 018 4 Label018 168 288 352 40 0 Click to update the pie menu with the latest information
+c 019 4 Label019 168 336 376 40 0 Adds an Item to the submenu of the currently selected item
+c 020 4 Label020 168 384 448 16 0 Saves Changes to the config file. Ensure that you have pressed
+c 021 4 Label021 168 408 416 16 0 "Update" before pressing this or latest changes won't be saved
+c 022 2 Line022 8 440 640 16 0 
+c 023 5 settings_button 8 536 144 48 0 Settings
+c 024 5 new_item_button 160 536 152 48 0 Add New Item

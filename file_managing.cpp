@@ -19,7 +19,7 @@ SaveConfig get_config_file() {
   if (std::filesystem::exists(path) == false) {
     generate_default_config_file();
   }
-
+  if (DEBUG_LOG_RAYPIE) { std::cout << std::endl << "Ignore Texture Unloading Below, its part of the config file loading process" << std::endl; }
   std::ifstream inFile(path);
   json loadedJson;
   inFile >> loadedJson;

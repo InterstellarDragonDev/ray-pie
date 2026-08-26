@@ -13,7 +13,7 @@ ITEM::ITEM() {
 };
 ITEM::~ITEM() {
   UnloadTexture(icon_texture);
-  if (DEBUG_LOG_RAYPIE) { std::cout << "unloaded " << title << "'s texture successfully" << std::endl; }
+  if (DEBUG_LOG_RAYPIE) { std::cout << "unloaded [" << title << "] texture successfully" << std::endl; }
 
 }
 
@@ -52,7 +52,7 @@ void ITEM::load_textures() {
   // if the image can't be found the default image must be loaded
   std::filesystem::path path = icon_path.c_str();
   if (!std::filesystem::exists(path)) {
-    if (DEBUG_LOG_RAYPIE) { std::cout << "Item : " << title << " failed to load image: " << icon_path << " as it does not exist. Using default icon instead" << std::endl; }
+    if (DEBUG_LOG_RAYPIE) { std::cout << "\033[31mItem : [" << title << "] failed to load image: " << icon_path << " as it does not exist. Using default icon instead\033[0m" << std::endl; }
     Image img;
     if (submenu_array.size() > 0) {img = LoadImageFromMemory(".png", folder_icon, folder_icon_length);}
     else {img = LoadImageFromMemory(".png", app_icon, app_icon_length);}
@@ -74,10 +74,10 @@ void ITEM::load_textures() {
 }
 
 void ITEM::button_pressed() {
-  if (DEBUG_LOG_RAYPIE) { std::cout << "button, " << title << " has been pressed" << std::endl; }
+  if (DEBUG_LOG_RAYPIE) { std::cout << "button [" << title << "] has been pressed" << std::endl; }
 
   if (launch_command == "") {
-    if (DEBUG_LOG_RAYPIE) { std::cout << "No launch command was provided for this button" << std::endl; }
+    if (DEBUG_LOG_RAYPIE) { std::cout << "\033[31mNo launch command was provided for this button\033[0m" << std::endl; }
     return;
   }
   if (DEBUG_LOG_RAYPIE) {std::cout << "launching command: " << launch_command << std::endl; }
@@ -106,9 +106,8 @@ Image LoadSVGImage(const char* filename, int targetWidth)
 {
     NSVGimage* svg = nsvgParseFromFile(filename, "px", 96.0f);
 
-   if (!svg)
-{
-    TraceLog(LOG_ERROR, "Failed to load SVG: %s", filename);
+   if (!svg) {
+    if (DEBUG_LOG_RAYPIE) { std::cout << "\033[31mFailed to load SVG: " << filename  << "\033[0m" << std::endl; }
     return { 0 };
 }
     // Calculate the scale required to achieve the requested width
@@ -150,11 +149,20 @@ Image LoadSVGImage(const char* filename, int targetWidth)
 // -----------------------------------------------------------------------------------------------------------
 
 RadialMenu::RadialMenu() {
+  init();
+}
 
+void RadialMenu::reset() {
+  item_nest.clear();
+  submenu_nest.clear();
+  item_array.clear();
+}
+
+void RadialMenu::init() {
   SaveConfig save = get_config_file();
   item_array = save.item_vector;
   settings = save.settings;
-
+  if (DEBUG_LOG_RAYPIE) { std::cout << "Ignore Texture Unloading Above, its part of the config file loading process" << std::endl << std::endl; }
   for (ITEM &i : item_array) {i.load_textures();};
   item_nest.push_back(&item_array);
   current_rotation = settings.rotation_offset;
@@ -192,6 +200,8 @@ int RadialMenu::draw() {
 
 int RadialMenu::check_mouse_inputs(ITEM& i, int arr_size) {
 
+  
+
   Vector2 current_position = polar_to_coords(i.current_radius, i.current_angle, MENU_CENTRE);
   float icon_scale = 1.0f;
 
@@ -203,6 +213,9 @@ int RadialMenu::check_mouse_inputs(ITEM& i, int arr_size) {
   // else it can be any number and that stuffs up the angle check with the mouse.
   // a silly hack ik but I'm kinda lazy and won't be fixing it :3
 
+  if (EDIT_MODE) {
+        if (mouse_radius > settings.radius + 80) { return 0; }
+  }
 
 // check if an Item has been pressed and calls the appropriate function
   if (abs(item_theta - mouse_theta) < PI / arr_size && mouse_radius > settings.radius / 2) {
@@ -210,20 +223,34 @@ int RadialMenu::check_mouse_inputs(ITEM& i, int arr_size) {
 
     icon_scale = 1.1f;
 
+    // to navigate into a submenu during edit mode, right click must be used
+    if (IsMouseButtonPressed(1)) {
+      if (EDIT_MODE) { goto do_submenu; }
+    }
+
     if (IsMouseButtonPressed(0)) {
 
+      if (EDIT_MODE) {
+        // set the pressed item to be in edit focus
+        edit_focus = &i;
+        return 0;
+      }
+
       if (i.type == "button") {
-        if (EDIT_MODE) {return 0;} // dont do anything if we are in edit mode
         i.button_pressed();
         return 1;
       }
+
+      do_submenu:
       // if submenu has been pressed
-      if (DEBUG_LOG_RAYPIE) { std::cout << "moved to submenu " << i.title << std::endl; }
-      item_nest.push_back(&i.submenu_array);
-      submenu_nest.push_back(&i);
-      current_rotation = i.rotation;
-      SetMousePosition(MENU_CENTRE.x, MENU_CENTRE.y);
-      return 2;
+      if (i.type == "sub-menu") {
+        if (DEBUG_LOG_RAYPIE) { std::cout << "moved to submenu [" << i.title << "]" << std::endl; }
+        item_nest.push_back(&i.submenu_array);
+        submenu_nest.push_back(&i);
+        current_rotation = i.rotation;
+        SetMousePosition(MENU_CENTRE.x, MENU_CENTRE.y);
+        return 2;
+      }
     }
   }
 
@@ -269,10 +296,12 @@ void RadialMenu::update_postion(ITEM& i, float target_angle) {
   float mouse_theta, item_theta, mouse_radius, item_radius;
   coords_to_polar(GetMousePosition(), mouse_radius, mouse_theta, MENU_CENTRE);
   coords_to_polar(current_position, item_radius, item_theta, MENU_CENTRE);
+  
+  if (settings.dynamic_movement) {
   i.target_radius += (1 - abs(abs(item_theta) - abs(mouse_theta))) * Vector2Distance({ MENU_CENTRE.x, MENU_CENTRE.y}, GetMousePosition()) / 20;
+  }
 
   i.lerp();
-
 
 
   if (i.submenu_array.size() > 0) {
@@ -315,4 +344,46 @@ void RadialMenu::print_item_information(std::vector<ITEM>& arr) {
       std::cout << std::endl;
     }
   }
+}
+
+// miscellaneous -----------------------------------------------
+
+// gets the current path of the ray-pie executable
+std::filesystem::path get_executable_path() {
+  char buffer[PATH_MAX];
+    // /proc/self/exe is a symlink pointing to the true binary
+    ssize_t len = readlink("/proc/self/exe", buffer, sizeof(buffer) - 1);
+    if (len != -1) {
+        buffer[len] = '\0';
+        return std::filesystem::path(buffer);
+    }
+}
+
+
+// Checks if any keyboard buttons were pressed and handles them accordingly
+int check_key_inputs(RadialMenu *menu) {
+  if (IsKeyDown(KEY_A)) {  menu->current_rotation -= 0.08; std::cout << menu->current_rotation << std::endl; }
+    if (IsKeyDown(KEY_D)) { menu->current_rotation += 0.08; std::cout << menu->current_rotation << std::endl; }
+
+    // press Ctrl + E to relaunch in Edit mode
+    if (IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL)) {
+      if (IsKeyPressed(KEY_E)) {
+        std::filesystem::path full_path = get_executable_path();
+        if (full_path.empty()) {std::cout << "\033[31mFailed to detect executable path.\033[0m" << std::endl; }
+        if (DEBUG_LOG_RAYPIE) { std::cout << "Path of current executable: " << full_path << std::endl << "\033[36mRelaunching in Config Mode\033[0m" << std::endl; }
+        std::string cmd = "nohup " + full_path.string() + " edit " + " >/dev/null 2>&1 &";
+        std::system(cmd.c_str());
+        return 1;
+      }
+    }
+    // Press Ctrl + R to refresh the menu (reloads the config file)
+    if (IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL)) {
+      if (IsKeyPressed(KEY_R)) {
+        if (DEBUG_LOG_RAYPIE) { std::cout << "\033[36mReloading Radial Menu\033[0m" << std::endl; }
+        // reset the radial menu (to clear out any nesting) and then re-initialise it
+        menu->reset();
+        menu->init();
+      }
+    }
+    return 0;
 }
