@@ -1,15 +1,11 @@
-#include "backend.h"
 #define RAYGUI_IMPLEMENTATION
-#include "raygui.h"
 #define GUI_ITEM_EDITOR_IMPLEMENTATION
-#include "gui_item_editor.h"
+#include "backend.h"
 
 int window_width = 800;
 int window_height = 800;
 
-void test_func() {
-  std::cout << "greetings tarnished" << std::endl;
-}
+
 
 int main(int argc, char* argv[]) {
 
@@ -31,16 +27,8 @@ int main(int argc, char* argv[]) {
 
   RadialMenu menu;
 
-  GuiItemEditorState editorState = InitGuiItemEditor();
+  item_editor_state editor = init_item_editor();
 
-  editorState.menu = &menu;
-  editorState.save = save_button;
-  editorState.add_to_current = test_func;
-  editorState.update = test_func;
-  editorState.settings = test_func;
-  editorState.new_item = test_func;
-
-  std::cout << "\033[36mSomehow got to here\033[0m" << std::endl;
 
   while (!WindowShouldClose()) {
 
@@ -58,7 +46,7 @@ int main(int argc, char* argv[]) {
 
     // Display Info for Item when in edit mode
     if (EDIT_MODE) {
-      GuiItemEditor(&editorState);
+      item_editor_gui(&editor);
     }
 
     EndDrawing();
