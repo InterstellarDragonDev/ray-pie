@@ -1,5 +1,4 @@
 #define RAYGUI_IMPLEMENTATION
-#define GUI_ITEM_EDITOR_IMPLEMENTATION
 #include "backend.h"
 
 int window_width = 800;
@@ -28,10 +27,9 @@ int main(int argc, char* argv[]) {
   RadialMenu menu;
 
   item_editor_state editor = init_item_editor();
-
+  settings_editor_state settings_editor = init_settings_editor(&menu);
 
   while (!WindowShouldClose()) {
-
     if (check_key_inputs(&menu) == 1) {
       break;
     }
@@ -42,11 +40,14 @@ int main(int argc, char* argv[]) {
 
 
     // drawcall, if button is pressed, 1 is returned and program exits
-    if (menu.draw() == 1) {break;};
+    input_return i = menu.draw();
+    if (i.exit) { break; };
+    if ((EDIT_MODE) && (i.item != nullptr)) { set_new_focus(&editor, i.item); }
 
     // Display Info for Item when in edit mode
     if (EDIT_MODE) {
-      item_editor_gui(&editor);
+      if (SETTINGS_EDIT) {settings_editor_gui(&settings_editor, &menu); }
+      else {item_editor_gui(&editor, &menu);}
     }
 
     EndDrawing();

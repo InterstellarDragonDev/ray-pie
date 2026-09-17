@@ -41,9 +41,9 @@ void ITEM::render_icon(Vector2 centre, Color tint) {
   Vector2 current_position = polar_to_coords(current_radius, current_angle, centre);
 
   Rectangle src = { 0, 0, (float)icon_texture.width, (float)icon_texture.height };
-  Vector2 origin = { icon_size / 2, icon_size / 2 };
+  Vector2 origin = { target_icon_size / 2, target_icon_size / 2 };
 
-  Rectangle dst = { current_position.x, current_position.y,  icon_size, icon_size };
+  Rectangle dst = { current_position.x, current_position.y,  target_icon_size, target_icon_size };
 
   DrawTexturePro(icon_texture, src, dst, origin, 0, tint);
 }
@@ -172,7 +172,7 @@ void RadialMenu::init() {
   SetMousePosition(MENU_CENTRE.x, MENU_CENTRE.y);
 }
 
-int RadialMenu::draw() {
+input_return RadialMenu::draw() {
    // get all items currently needing to be rendered
     auto focused_item_arr = item_nest.back();
 
@@ -184,8 +184,10 @@ int RadialMenu::draw() {
       float target_angle = theta * i + PI / focused_item_arr->size() + current_rotation;
       int input_return = check_mouse_inputs((*focused_item_arr)[i], focused_item_arr->size());
 
-      if (input_return == 1) return 1;
-      if (input_return == 2) return 2;
+      if (input_return == 1) return {nullptr, true};
+      if (input_return == 2) return {nullptr, false};
+      if (input_return == 3) return {&(*focused_item_arr)[i], false};
+      
 
       update_postion((*focused_item_arr)[i], target_angle);
 
@@ -194,7 +196,7 @@ int RadialMenu::draw() {
     }
 
     DrawCircle(MENU_CENTRE.x, MENU_CENTRE.y, 30, RED);
-    return 0;
+    return {nullptr, false}; // return nothing if no action is needed
   
 }
 
@@ -231,9 +233,7 @@ int RadialMenu::check_mouse_inputs(ITEM& i, int arr_size) {
     if (IsMouseButtonPressed(0)) {
 
       if (EDIT_MODE) {
-        // set the pressed item to be in edit focus
-        edit_focus = &i;
-        return 0;
+        return 3;
       }
 
       if (i.type == "button") {
@@ -279,7 +279,9 @@ int RadialMenu::check_mouse_inputs(ITEM& i, int arr_size) {
     }
   }
 
-  i.icon_size = (int)Lerp(i.icon_size, icon_scale * GLOBAL_SCALE * 60, 0.2);
+  // TODO: figure out a good icon_scaling equations
+    i.target_icon_size = i.icon_size;
+  //i.target_icon_size = (int)Lerp(i.icon_size, icon_scale * GLOBAL_SCALE * 60, 0.2);
 
   return 0;
 
@@ -297,8 +299,18 @@ void RadialMenu::update_postion(ITEM& i, float target_angle) {
   coords_to_polar(GetMousePosition(), mouse_radius, mouse_theta, MENU_CENTRE);
   coords_to_polar(current_position, item_radius, item_theta, MENU_CENTRE);
   
+  // old dynamic movement system
+  // if (settings.dynamic_movement) {
+  // i.target_radius += (1 - abs(abs(item_theta) - abs(mouse_theta))) * Vector2Distance({ MENU_CENTRE.x, MENU_CENTRE.y}, GetMousePosition()) / 20;
+  // }
+  
+  // updated dynamic movement system
   if (settings.dynamic_movement) {
-  i.target_radius += (1 - abs(abs(item_theta) - abs(mouse_theta))) * Vector2Distance({ MENU_CENTRE.x, MENU_CENTRE.y}, GetMousePosition()) / 20;
+    float dot = Vector2DotProduct(Vector2Normalize(Vector2Subtract(current_position, MENU_CENTRE)), Vector2Normalize(Vector2Subtract(GetMousePosition(), MENU_CENTRE)));
+    //float dot = (abs(Vector2DotProduct(Vector2Normalize(Vector2Subtract(current_position, MENU_CENTRE)), Vector2Normalize(Vector2Subtract(GetMousePosition(), MENU_CENTRE)))) * 2) - 1;
+    float dist = Vector2Distance(MENU_CENTRE, GetMousePosition()); 
+    //std::cout << i.title << ":  " << dot << std::endl;
+    i.target_radius = settings.radius + dot * dist / 8;
   }
 
   i.lerp();
@@ -326,7 +338,7 @@ void RadialMenu::render_items(ITEM& i) {
   // render the submenu icons around the submenu as a preview
   if (i.submenu_array.size() > 0) {
     for (auto& j : i.submenu_array) {
-      j.icon_size = 18;
+      j.target_icon_size = 18;
       j.render_icon(current_position, { 255, 255, 255, 50 });
     }
   }
@@ -346,6 +358,14 @@ void RadialMenu::print_item_information(std::vector<ITEM>& arr) {
   }
 }
 
+void RadialMenu::reload_textures() {
+  if (DEBUG_LOG_RAYPIE) { std::cout << "\033[36mReloading Textures.....\033[0m" << std::endl; }
+  for (int i = 0; i < item_array.size(); i++) {
+    item_array[i].load_textures();
+  }
+  if (DEBUG_LOG_RAYPIE) { std::cout << "\033[36mTextures have been Reloaded\033[0m" << std::endl; }
+}
+
 // miscellaneous -----------------------------------------------
 
 // gets the current path of the ray-pie executable
@@ -362,28 +382,37 @@ std::filesystem::path get_executable_path() {
 
 // Checks if any keyboard buttons were pressed and handles them accordingly
 int check_key_inputs(RadialMenu *menu) {
-  if (IsKeyDown(KEY_A)) {  menu->current_rotation -= 0.08; std::cout << menu->current_rotation << std::endl; }
-    if (IsKeyDown(KEY_D)) { menu->current_rotation += 0.08; std::cout << menu->current_rotation << std::endl; }
 
+  // handles the rotation of current menu
+  if (IsKeyDown(KEY_MINUS)) {  menu->current_rotation -= 0.01; std::cout << menu->current_rotation * 180 / PI << std::endl; }
+  if (IsKeyDown(KEY_EQUAL)) { menu->current_rotation += 0.01; std::cout << menu->current_rotation * 180 / PI << std::endl; }
+  
+  if (IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL)) {
     // press Ctrl + E to relaunch in Edit mode
-    if (IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL)) {
-      if (IsKeyPressed(KEY_E)) {
-        std::filesystem::path full_path = get_executable_path();
-        if (full_path.empty()) {std::cout << "\033[31mFailed to detect executable path.\033[0m" << std::endl; }
-        if (DEBUG_LOG_RAYPIE) { std::cout << "Path of current executable: " << full_path << std::endl << "\033[36mRelaunching in Config Mode\033[0m" << std::endl; }
-        std::string cmd = "nohup " + full_path.string() + " edit " + " >/dev/null 2>&1 &";
-        std::system(cmd.c_str());
-        return 1;
-      }
+    if (IsKeyPressed(KEY_E)) {
+      std::filesystem::path full_path = get_executable_path();
+      if (full_path.empty()) {std::cout << "\033[31mFailed to detect executable path.\033[0m" << std::endl; }
+      if (DEBUG_LOG_RAYPIE) { std::cout << "Path of current executable: " << full_path << std::endl << "\033[36mRelaunching in Config Mode\033[0m" << std::endl; }
+      std::string cmd = "nohup " + full_path.string() + " edit " + " >/dev/null 2>&1 &";
+      std::system(cmd.c_str());
+      return 1;
     }
     // Press Ctrl + R to refresh the menu (reloads the config file)
-    if (IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL)) {
-      if (IsKeyPressed(KEY_R)) {
-        if (DEBUG_LOG_RAYPIE) { std::cout << "\033[36mReloading Radial Menu\033[0m" << std::endl; }
-        // reset the radial menu (to clear out any nesting) and then re-initialise it
-        menu->reset();
-        menu->init();
-      }
+    else if (IsKeyPressed(KEY_R)) {
+      if (DEBUG_LOG_RAYPIE) { std::cout << "\033[36mReloading Radial Menu\033[0m" << std::endl; }
+      // reset the radial menu (to clear out any nesting) and then re-initialise it
+      menu->reset();
+      menu->init();
     }
-    return 0;
+    // Press Ctrl + T to reload all textures in the menu
+    else if (IsKeyPressed(KEY_T)) {
+      menu->reload_textures();
+    }
+  }
+  
+  if (IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL)) {
+    
+  }
+
+  return 0;
 }

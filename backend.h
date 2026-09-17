@@ -16,8 +16,8 @@
 #include <unistd.h>
 #include <limits.h>
 #include <cstring>
+#include <algorithm>
 
-// WARNING: raygui implementation is expected to be defined before including this header
 #include "raygui.h"
 
 using json = nlohmann::json;
@@ -27,8 +27,9 @@ using json = nlohmann::json;
 Image LoadSVGImage(const char* filename, int targetWidth);
 
 inline Vector2 MENU_CENTRE = {400, 400};
-inline int GLOBAL_SCALE = 1;
+inline int GLOBAL_SCALE = 7;
 inline bool EDIT_MODE = false;
+inline bool SETTINGS_EDIT = false;
 
 // raylib log level numbers
 /*
@@ -41,7 +42,7 @@ LOG_ERROR:   5 (Error logging)
 LOG_FATAL:   6 (Fatal logging, aborts program)
 LOG_NONE:    7
 */
-inline int DEBUG_LOG_RAYLIB = 7;
+inline int DEBUG_LOG_RAYLIB = 5;
 inline bool DEBUG_LOG_RAYPIE = true;
 inline bool DEBUG_LOG_SAVE_FILE = false;
 
@@ -71,6 +72,7 @@ public:
   std::string icon_path;
   Texture2D line_texture = LoadTextureFromImage(line_img);
   int icon_size = 60;
+  int target_icon_size = 60;
   std::string launch_command;
   std::vector<ITEM> submenu_array;
   float rotation = 0.0f;
@@ -115,6 +117,7 @@ public:
 // File Reading & Saving
 // ---------------------------------------------------------
 SaveConfig get_config_file();
+void save_config_file(settings_struct *settings, std::vector<ITEM> *item_arr);
 
 
 /* RADIAL MENU CLASS */
@@ -134,6 +137,12 @@ SaveConfig get_config_file();
   All other functions are kinda self-explainatory
 */
 
+struct input_return {
+  ITEM* item;
+  bool exit;
+};
+
+
 class RadialMenu {
 
 public:
@@ -148,12 +157,13 @@ public:
   void update_postion(ITEM& i, float target_angle);
   void render_items(ITEM& i);
 
-  int draw();
+  input_return draw();
 
   void print_item_information(std::vector<ITEM>& arr);
   RadialMenu();
   void reset();
   void init();
+  void reload_textures();
 };
 
 
@@ -163,8 +173,6 @@ int check_key_inputs(RadialMenu *menu);
 
 /* Edit Mode */
 // ------------------------------------------------------------------------------------------------------
-
-inline ITEM *edit_focus = nullptr;
 
 typedef struct {
     bool title_boxEditMode;
@@ -178,74 +186,55 @@ typedef struct {
     bool submenu_rotation_spnEditMode;
     int submenu_rotation_spnValue;
 
+    ITEM* focus_item;
     // function references for buttons
-    void (*save)();
-    void (*add_to_current)();
-    void (*update)();
     void (*settings)();
-    void (*new_item)();
 
 } item_editor_state;
 
+typedef struct {
+    bool animate_speed_edtEditMode;
+    int animate_speed_edtValue;
+    bool radius_edtEditMode;
+    int radius_edtValue;
+    bool rotation_offset_edtEditMode;
+    int rotation_offset_edtValue;
+    bool icon_scale_edtEditMode;
+    int icon_scale_edtValue;
+    bool dynamic_movement_chkChecked;
+    bool centre_pointer_chkChecked;
+    bool icon_path_boxEditMode;
+    char icon_path_boxText[128];
+    bool save_btnPressed;
+    bool exit_btnPressed;
+    bool update_btnPressed;
+
+    // Custom state variables (depend on development software)
+    // NOTE: This variables should be added manually if required
+
+} settings_editor_state;
+
+// init gui states
 item_editor_state init_item_editor(void);
-void item_editor_gui(item_editor_state *state);
+settings_editor_state init_settings_editor(RadialMenu *menu);
 
 
+void set_new_focus(item_editor_state *state, ITEM* focus_item);
 
-#if defined(GUI_ITEM_EDITOR_IMPLEMENTATION)
+// Button Functions
+void update_button(item_editor_state *state);
+void save_button(RadialMenu *menu);
+void new_item_button(RadialMenu *menu);
+void new_item_focused_button(item_editor_state *state, RadialMenu *menu);
+void remove_item_button(item_editor_state *state, RadialMenu *menu);
+void settings_button();
 
+void exit_settings_button();
+void update_settings_button(settings_editor_state *state, RadialMenu *menu);
 
-//----------------------------------------------------------------------------------
-// Module Functions Definition
-//----------------------------------------------------------------------------------
-item_editor_state init_item_editor(void)
-{
-    item_editor_state state = { 0 };
-
-    state.title_boxEditMode = false;
-    strcpy(state.title_boxText, "Title");
-    state.icon_path_boxEditMode = false;
-    strcpy(state.icon_path_boxText, "Icon Path");
-    state.launch_command_boxEditMode = false;
-    strcpy(state.launch_command_boxText, "Launch Command");
-    state.icon_size_spnEditMode = false;
-    state.icon_size_spnValue = 0;
-    state.submenu_rotation_spnEditMode = false;
-    state.submenu_rotation_spnValue = 0;
-
-
-    return state;
-}
-
-
-void item_editor_gui(item_editor_state *state)
-{
-    if (GuiTextBox((Rectangle){ 136, 40, 512, 32 }, state->title_boxText, 128, state->title_boxEditMode)) state->title_boxEditMode = !state->title_boxEditMode;
-    if (GuiTextBox((Rectangle){ 136, 88, 512, 32 }, state->icon_path_boxText, 128, state->icon_path_boxEditMode)) state->icon_path_boxEditMode = !state->icon_path_boxEditMode;
-    if (GuiTextBox((Rectangle){ 136, 136, 512, 32 }, state->launch_command_boxText, 128, state->launch_command_boxEditMode)) state->launch_command_boxEditMode = !state->launch_command_boxEditMode;
-    GuiLabel((Rectangle){ 8, 40, 120, 32 }, "Title");
-    GuiLabel((Rectangle){ 8, 88, 120, 32 }, "Icon Path");
-    GuiLabel((Rectangle){ 8, 136, 120, 32 }, "Launch Command");
-    if (GuiSpinner((Rectangle){ 136, 192, 160, 24 }, NULL, &state->icon_size_spnValue, 0, 100, state->icon_size_spnEditMode)) state->icon_size_spnEditMode = !state->icon_size_spnEditMode;
-    GuiLabel((Rectangle){ 8, 192, 120, 24 }, "Icon Size");
-    GuiLabel((Rectangle){ 8, 232, 120, 24 }, "Submenu Rotation");
-    if (GuiButton((Rectangle){ 8, 384, 136, 40 }, "Save New Config")) state->save(); 
-    GuiLine((Rectangle){ 8, 264, 640, 16 }, NULL);
-    if (GuiButton((Rectangle){ 8, 336, 136, 40 }, "Add Item To Current")) state->add_to_current(); 
-    if (GuiSpinner((Rectangle){ 136, 232, 160, 24 }, NULL, &state->submenu_rotation_spnValue, 0, 100, state->submenu_rotation_spnEditMode)) state->submenu_rotation_spnEditMode = !state->submenu_rotation_spnEditMode;
-    if (GuiButton((Rectangle){ 8, 288, 136, 40 }, "Update")) state->update(); 
-    GuiLabel((Rectangle){ 320, 192, 144, 24 }, "In Pixels (Default 60)");
-    GuiLabel((Rectangle){ 320, 232, 144, 24 }, "In Degrees (Default 0)");
-    GuiLabel((Rectangle){ 168, 288, 352, 40 }, "Click to update the pie menu with the latest information");
-    GuiLabel((Rectangle){ 168, 336, 376, 40 }, "Adds an Item to the submenu of the currently selected item");
-    GuiLabel((Rectangle){ 168, 384, 448, 16 }, "Saves Changes to the config file. Ensure that you have pressed");
-    GuiLabel((Rectangle){ 168, 408, 416, 16 }, "'Update' before pressing this or latest changes won't be saved");
-    GuiLine((Rectangle){ 8, 440, 640, 16 }, NULL);
-    if (GuiButton((Rectangle){ 8, 536, 144, 48 }, "Settings")) state->settings(); 
-    if (GuiButton((Rectangle){ 160, 536, 152, 48 }, "Add New Item")) state->new_item(); 
-}
-
-#endif // GUI_ITEM_EDITOR_IMPLEMENTATION
+// renders the gui
+void item_editor_gui(item_editor_state *state, RadialMenu *menu);
+void settings_editor_gui(settings_editor_state *state, RadialMenu *menu);
 
 
 #endif

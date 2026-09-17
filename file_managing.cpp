@@ -63,6 +63,19 @@ void generate_default_config_file() {
   
 }
 
+void save_config_file(settings_struct *settings, std::vector<ITEM> *item_arr) {
+  SaveConfig new_config;
+  new_config.item_vector = *item_arr;
+  new_config.settings = *settings;
+
+  std::string path = get_config_path();
+  json j = new_config;
+  std::ofstream file(path);
+  file << j.dump(4);
+  file.close();
+  std::cout << "Config File Saved Successfully" << std::endl;
+}
+
 // helper function to get the config path
 std::string get_config_path() {
   const char* homedir = std::getenv("HOME");

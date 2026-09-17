@@ -1,0 +1,24 @@
+#
+# rgl layout text file (v4.0) - raygui layout file generated using rGuiLayout
+#
+# Number of controls:     14
+#
+# Ref. window:    r <x> <y> <width> <height>
+# Anchor info:    a <id> <name> <posx> <posy> <enabled>
+# Control info:   c <id> <type> <name> <rectangle> <anchor_id> <text>
+#
+r 0 40 -1 -1
+c 000 14 animate_speed_edt 104 24 120 24 0 Animate Speed 
+c 001 14 radius_edt 104 56 120 24 0 Radius 
+c 002 14 rotation_offset_edt 104 88 120 24 0 Rotation Offset 
+c 003 14 icon_scale_edt 104 120 120 24 0 Icon Scale 
+c 004 7 CheckBoxEx004 104 152 24 24 0 
+c 005 7 centre_pointer_chk 104 184 24 24 0 
+c 006 12 icon_path_box 104 216 328 24 0 
+c 007 4 Label007 8 152 96 24 0 Dynamic Movement
+c 008 4 Label008 24 184 80 24 0 Centre Pointer
+c 009 4 Label009 8 216 96 24 0 Centre Icon Path
+c 010 5 save_btn 24 304 96 32 0 Save
+c 011 5 exit_btn 24 344 96 32 0 Exit
+c 012 5 update_btn 24 264 96 32 0 Update
+c 013 2 Line013 8 240 424 24 0 
