@@ -299,19 +299,22 @@ void RadialMenu::update_postion(ITEM& i, float target_angle) {
   coords_to_polar(GetMousePosition(), mouse_radius, mouse_theta, MENU_CENTRE);
   coords_to_polar(current_position, item_radius, item_theta, MENU_CENTRE);
   
-  // old dynamic movement system
-  // if (settings.dynamic_movement) {
-  // i.target_radius += (1 - abs(abs(item_theta) - abs(mouse_theta))) * Vector2Distance({ MENU_CENTRE.x, MENU_CENTRE.y}, GetMousePosition()) / 20;
-  // }
   
   // updated dynamic movement system
-  if (settings.dynamic_movement) {
-    float dot = Vector2DotProduct(Vector2Normalize(Vector2Subtract(current_position, MENU_CENTRE)), Vector2Normalize(Vector2Subtract(GetMousePosition(), MENU_CENTRE)));
-    //float dot = (abs(Vector2DotProduct(Vector2Normalize(Vector2Subtract(current_position, MENU_CENTRE)), Vector2Normalize(Vector2Subtract(GetMousePosition(), MENU_CENTRE)))) * 2) - 1;
+  float dot = 0.0;
+  switch (settings.dynamic_movement) {
+    case SINGLE:
+      dot = Vector2DotProduct(Vector2Normalize(Vector2Subtract(current_position, MENU_CENTRE)), Vector2Normalize(Vector2Subtract(GetMousePosition(), MENU_CENTRE)));
+      break;
+    
+    case DOUBLE:
+      dot = (abs(Vector2DotProduct(Vector2Normalize(Vector2Subtract(current_position, MENU_CENTRE)), Vector2Normalize(Vector2Subtract(GetMousePosition(), MENU_CENTRE)))) * 2) - 1;
+      break;
+    }
+
     float dist = Vector2Distance(MENU_CENTRE, GetMousePosition()); 
     //std::cout << i.title << ":  " << dot << std::endl;
-    i.target_radius = settings.radius + dot * dist / 8;
-  }
+    i.target_radius = settings.radius + dot * settings.dmv_strength * dist / 8;
 
   i.lerp();
 
@@ -415,4 +418,27 @@ int check_key_inputs(RadialMenu *menu) {
   }
 
   return 0;
+}
+
+void PopupManager::new_popup(float time, std::string main_title, std::string second_text) {
+  popup_vector.push_back({time, main_title, second_text});
+}
+void PopupManager::update() {
+  if (popup_vector.size() == 0) return;
+
+    for (auto& popup : popup_vector) {
+      popup.duration -= GetFrameTime();
+  }
+
+  std::erase_if(popup_vector, [](const auto& popup) {
+      return popup.duration < 0;
+  });
+}
+void PopupManager::render() {
+  if (popup_vector.size() == 0) return; 
+
+  for (int i = 0; i < popup_vector.size(); i++) {
+    GuiPanel({10, 700.0f - i * 100, 250, 80}, popup_vector[i].title.c_str());
+    GuiLabel({20, 720.0f - i * 100, 200, 40}, popup_vector[i].text.c_str());
+  }
 }

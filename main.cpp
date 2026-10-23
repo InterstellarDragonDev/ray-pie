@@ -38,6 +38,9 @@ int main(int argc, char* argv[]) {
     if (EDIT_MODE) { ClearBackground(BLACK); }
     else { ClearBackground(BLANK); }
 
+    // deals with all popup logic and function
+    popups.update();
+    popups.render();
 
     // drawcall, if button is pressed, 1 is returned and program exits
     input_return i = menu.draw();

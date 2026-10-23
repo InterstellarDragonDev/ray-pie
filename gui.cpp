@@ -29,7 +29,8 @@ settings_editor_state init_settings_editor(RadialMenu *menu) {
     state.rotation_offset_edtValue = menu->settings.rotation_offset * 180 / PI;
     state.icon_scale_edtEditMode = false;
     state.icon_scale_edtValue = menu->settings.icon_scale * 100;
-    state.dynamic_movement_chkChecked = menu->settings.dynamic_movement;
+    state.dynamic_movement_EditMode = false;
+    state.dynamic_movement_Active = menu->settings.dynamic_movement;
     state.centre_pointer_chkChecked = menu->settings.centre_pointer;
     state.icon_path_boxEditMode = false;
     strcpy(state.icon_path_boxText, menu->settings.centre_icon.c_str());
@@ -74,6 +75,8 @@ void update_button(item_editor_state *state) {
     state->focus_item->launch_command = state->launch_command_boxText;
     state->focus_item->icon_size = state->icon_size_spnValue;
     state->focus_item->rotation = state->submenu_rotation_spnValue * PI / 180;
+
+    popups.new_popup(4, "Update", "Item Has Been Updated Successfully");
 }
 
 // TODO: probably worth adding some visual feedback that the files been saved
@@ -82,7 +85,9 @@ void save_button(RadialMenu *menu) {
     // menu->reset();
     // menu->init();
     menu->reload_textures();
+    popups.new_popup(4, "Save", "Config File Saved Successfully");
 }
+
  // TODO: Figure out what causes the textures to fuck themselves :(
  //* Ok so I "fixed" it by just force reloading the textures cuz I can't be asked to do this properly :>
  // (this will have absolutely no future repurcussions btw, I promise...)
@@ -152,9 +157,11 @@ void update_settings_button(settings_editor_state *state, RadialMenu *menu) {
     menu->settings.rotation_offset = (float) state->rotation_offset_edtValue * PI / 180;
     menu->current_rotation = menu->settings.rotation_offset;
     menu->settings.icon_scale = (float) state->icon_scale_edtValue / 100.0;
-    menu->settings.dynamic_movement = state->dynamic_movement_chkChecked;
+    menu->settings.dynamic_movement = static_cast<dynamic_movement_enum>(state->dynamic_movement_Active);
     menu->settings.centre_pointer = state->centre_pointer_chkChecked;
     menu->settings.centre_icon = state->icon_path_boxText;
+
+    popups.new_popup(4, "Update Settings", "Settings Have Been Updated Successfully");
 }
 
 // GUI Functions ----------------------------------------------------------------------------------------------------------------
@@ -191,7 +198,9 @@ void settings_editor_gui(settings_editor_state *state, RadialMenu *menu) {
     if (GuiValueBox((Rectangle){ 104, 56, 120, 24 }, "Radius ", &state->radius_edtValue, 10, 1000, state->radius_edtEditMode)) state->radius_edtEditMode = !state->radius_edtEditMode;
     if (GuiValueBox((Rectangle){ 104, 88, 120, 24 }, "Rotation Offset ", &state->rotation_offset_edtValue, 0, 365, state->rotation_offset_edtEditMode)) state->rotation_offset_edtEditMode = !state->rotation_offset_edtEditMode;
     if (GuiValueBox((Rectangle){ 104, 120, 120, 24 }, "Icon Scale ", &state->icon_scale_edtValue, 0, 100, state->icon_scale_edtEditMode)) state->icon_scale_edtEditMode = !state->icon_scale_edtEditMode;
-    GuiCheckBox((Rectangle){ 104, 152, 24, 24 }, NULL, &state->dynamic_movement_chkChecked);
+    if (state->dynamic_movement_EditMode) GuiLock();
+    if (GuiDropdownBox((Rectangle){ 104, 152, 120, 24}, "NONE;SINGLE;DOUBLE", &state->dynamic_movement_Active, state->dynamic_movement_EditMode)) state->dynamic_movement_EditMode = !state->dynamic_movement_EditMode;
+    GuiUnlock();
     GuiCheckBox((Rectangle){ 104, 184, 24, 24 }, NULL, &state->centre_pointer_chkChecked);
     if (GuiTextBox((Rectangle){ 104, 216, 328, 24 }, state->icon_path_boxText, 128, state->icon_path_boxEditMode)) state->icon_path_boxEditMode = !state->icon_path_boxEditMode;
     GuiLabel((Rectangle){ 8, 152, 96, 24 }, "Dynamic Movement");

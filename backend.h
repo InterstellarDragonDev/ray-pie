@@ -31,6 +31,8 @@ inline int GLOBAL_SCALE = 7;
 inline bool EDIT_MODE = false;
 inline bool SETTINGS_EDIT = false;
 
+enum dynamic_movement_enum {NONE, SINGLE, DOUBLE};
+
 // raylib log level numbers
 /*
 LOG_ALL:     0 (Display all logs)
@@ -101,10 +103,11 @@ struct settings_struct {
   int radius = 250;
   float rotation_offset = 0.0;
   float icon_scale = 1.0;
-  bool dynamic_movement = false;
+  dynamic_movement_enum dynamic_movement = NONE;
+  float dmv_strength = 1.0;
   bool centre_pointer = false;
   std::string centre_icon = "";
-  NLOHMANN_DEFINE_TYPE_INTRUSIVE(settings_struct, animate_speed, radius, rotation_offset, icon_scale, dynamic_movement, centre_pointer, centre_icon)
+  NLOHMANN_DEFINE_TYPE_INTRUSIVE(settings_struct, animate_speed, radius, rotation_offset, icon_scale, dynamic_movement, dmv_strength, centre_pointer, centre_icon)
 };
 
 class SaveConfig {
@@ -170,6 +173,23 @@ public:
 std::filesystem::path get_executable_path();
 int check_key_inputs(RadialMenu *menu);
 
+struct Popup {
+  float duration;
+  std::string title;
+  std::string text; 
+};
+
+
+class PopupManager {
+  private:
+    std::vector<Popup> popup_vector;
+  public:
+    void new_popup(float time, std::string main_title, std::string second_text);
+    void update();
+    void render();
+};
+
+inline PopupManager popups;
 
 /* Edit Mode */
 // ------------------------------------------------------------------------------------------------------
@@ -201,16 +221,15 @@ typedef struct {
     int rotation_offset_edtValue;
     bool icon_scale_edtEditMode;
     int icon_scale_edtValue;
-    bool dynamic_movement_chkChecked;
+    //bool dynamic_movement_chkChecked;
+    bool dynamic_movement_EditMode;
+    int dynamic_movement_Active;
     bool centre_pointer_chkChecked;
     bool icon_path_boxEditMode;
     char icon_path_boxText[128];
     bool save_btnPressed;
     bool exit_btnPressed;
     bool update_btnPressed;
-
-    // Custom state variables (depend on development software)
-    // NOTE: This variables should be added manually if required
 
 } settings_editor_state;
 
@@ -235,6 +254,7 @@ void update_settings_button(settings_editor_state *state, RadialMenu *menu);
 // renders the gui
 void item_editor_gui(item_editor_state *state, RadialMenu *menu);
 void settings_editor_gui(settings_editor_state *state, RadialMenu *menu);
+
 
 
 #endif
