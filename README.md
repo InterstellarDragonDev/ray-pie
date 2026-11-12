@@ -213,5 +213,5 @@ ray-pie/
 - The normal window is fixed at 800×800 with the menu centred at (400, 400); edit mode uses 1400×800 with the menu centred at (1000, 400)
 - Edit mode uses an opaque black background; normal mode uses a transparent one
 - The transparency is only available if your compositor supports it, else it will render as a black background
-- The program does not automatically open with a keybind, that if for YOU to setup using your own DE or WM.
-- This application is linux only tho with some small tweaks it could work on windows as well I guess...
+- The program does not automatically open with a keybind, that is for YOU to setup using your own DE or WM.
+- This application is linux only, tho with some small tweaks I guess it could work on windows as well...
