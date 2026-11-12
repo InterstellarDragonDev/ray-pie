@@ -1,3 +1,6 @@
 /build
 /.vscode
 config.toml
+/default assets
+info_edit_gui.rgl
+sesttings_gui.rgl
