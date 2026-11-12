@@ -1,6 +1,6 @@
 # ray-pie
 
-It is a lightweight radial launcher for Linux, built with C++ and [raylib](https://www.raylib.com/). Items are arranged in a circle around a central point and launched by moving towards an desired item and clicking. Applications can be organized into nested sub-menus. The launcher can be configured via the inbuilt "edit mode" so there's no need to edit the config file directly.
+It is a lightweight radial launcher for Linux, built with C++ and [raylib](https://www.raylib.com/). Items are arranged in a circle around a central point and launched by moving towards the desired item and clicking. Applications can be organized into nested sub-menus. The launcher can be configured via the inbuilt "edit mode" so there's no need to edit the config file directly.
 
 ---
 
