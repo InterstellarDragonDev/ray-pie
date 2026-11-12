@@ -20,9 +20,9 @@ It is a lightweight radial launcher for Linux, built with C++ and [raylib](https
 - [raygui](https://github.com/raysan5/raygui): the edit-mode GUI and popups (`raygui.h`)
 - [nlohmann/json](https://github.com/nlohmann/json): config parsing (`json.hpp`)
 - [nanosvg](https://github.com/memononen/nanosvg): SVG icon loading (`nanosvg.h`, `nanosvgrast.h`)
-- A **C++20**-capable compiler (GCC, Clang). `std::erase_if` on vectors is used
-- A compositor supporting transparent windows (e.g. Hyprland, Picom)
-- Linux and X11 (the code uses `/proc/self/exe` and `nohup`, and links against `-lX11`)
+- A **C++20**-capable compiler (GCC, Clang).
+- A compositor supporting transparent windows (e.g. Hyprland, Picom) (otherwise it's just a black background)
+- Linux
 
 Notes that all single header Dependencies are included in the repo. Only `raylib` needs to be installed.
 
